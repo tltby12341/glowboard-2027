@@ -390,3 +390,6 @@ details p{margin:0 0 18px;color:var(--ink2)}
   .cmp-phone{width:min(124px,31vw)}
   .pay-sheet .pro-strip canvas{max-height:120px}
 }
+@media (min-width:641px){
+  .pay-sticky{position:sticky;bottom:-28px;margin:0 -28px;padding:14px 28px 14px;background:linear-gradient(to top,var(--cream,#FBF7F2) 80%,rgba(251,247,242,0));z-index:3}
+}
