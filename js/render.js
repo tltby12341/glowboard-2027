@@ -26,6 +26,7 @@ export async function loadManifest(base = './') {
   return MANIFEST;
 }
 
+const smallSrc = (src) => (src.startsWith('assets/img/') && !src.includes('/sm/') ? src.replace('assets/img/', 'assets/img/sm/') : src);
 export function loadImage(src) {
   if (IMG_CACHE.has(src)) return IMG_CACHE.get(src);
   // slow networks: never let one stalled photo block a render; retry it next time
@@ -33,7 +34,8 @@ export function loadImage(src) {
     const im = new Image();
     im.decoding = 'async';
     const timer = setTimeout(() => { IMG_CACHE.delete(src); resolve(null); }, 9000);
-    im.onload = () => { clearTimeout(timer); resolve(im); };
+    // decode off the main thread before the first drawImage (avoids long tasks on phones)
+    im.onload = () => { clearTimeout(timer); (im.decode ? im.decode().catch(() => {}) : Promise.resolve()).then(() => resolve(im)); };
     im.onerror = () => { clearTimeout(timer); IMG_CACHE.delete(src); resolve(null); };
     im.src = src;
   });
@@ -371,7 +373,9 @@ export async function renderBoard(canvas, state, opts = {}) {
 
   const { photos, texts } = buildItems(state, manifest, lang);
   swapPhotos(photos, state.swaps, manifest);
-  await Promise.all(photos.map(async (p) => { if (!p.img && p.src) p.img = await loadImage(p.src); }));
+  // previews, thumbs and hero phones use a lighter 480px photo set; real exports keep full-res photos
+  const small = Math.max(W, H) <= 1800;
+  await Promise.all(photos.map(async (p) => { if (!p.img && p.src) p.img = await loadImage(small ? smallSrc(p.src) : p.src); }));
 
   ctx.save();
   ctx.clearRect(0, 0, W, H);
