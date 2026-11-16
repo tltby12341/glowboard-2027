@@ -139,6 +139,7 @@ async function renderPreview() {
   const w = Math.round(cssW * dpr), h = Math.round(w * sz.h / sz.w);
   const t = themeById(state.themeId);
   dev.classList.toggle('is-pro', t.pro && !isPro);
+  updateDlLabel();
   dev.classList.toggle('light', !['oldmoney', 'darkluxe'].includes(t.id));
   await renderBoard(cv, state, { width: w, height: h, kind: sz.kind, watermark: !isPro });
   const ft = $('#fabThumb canvas');
@@ -186,6 +187,7 @@ function showResult(blob) {
   lastBlob = blob; if (lastUrl) URL.revokeObjectURL(lastUrl); lastUrl = URL.createObjectURL(blob);
   $('#resultImg').src = lastUrl; $('#saveLink').href = lastUrl;
   $('#resultUpsell').style.display = isPro ? 'none' : '';
+  if (!isPro) renderBoard($('#upsellCv'), state, { width: 140, height: 303, watermark: false });
   const text = T('share_text');
   $('#pinLink').href = `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(SITE)}&media=${encodeURIComponent(SITE + 'og-image.png')}&description=${encodeURIComponent(text)}`;
   $('#xLink').href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(SITE)}`;
@@ -194,6 +196,14 @@ function showResult(blob) {
   openModal('resultModal');
 }
 $('#downloadBtn').addEventListener('click', download);
+$('#upsellBtn').addEventListener('click', () => { closeModals(); openPay('result_upsell'); });
+function updateDlLabel() {
+  const lock = needsPro();
+  const label = lock ? 'Unlock & download' : T('download');
+  const s = $('#downloadBtn [data-i18n="download"]'); if (s) s.textContent = label;
+  $('#fabDownload').textContent = lock ? '✦ ' + label : label;
+  $('#downloadBtn').classList.toggle('locked', lock); $('#fabDownload').classList.toggle('locked', lock);
+}
 $('#fabDownload').addEventListener('click', download);
 $('#fabThumb').addEventListener('click', () => $('#device').scrollIntoView({ behavior: 'smooth', block: 'center' }));
 $('#saveLink').addEventListener('click', () => track('save_image'));
@@ -208,10 +218,23 @@ $('#shareBtn').addEventListener('click', async () => {
 $('#copyBtn').addEventListener('click', async () => { try { await navigator.clipboard.writeText(SITE); toast(T('copied')); track('copy_link'); } catch (e) {} });
 
 // ---------- pro / pay ----------
-function openPay() {
-  const art = $('#payArt'); art.innerHTML = '<canvas></canvas>';
-  renderBoard(art.firstChild, state, { width: 240, height: 520 });
-  openModal('payModal'); track('paywall_view', { theme: state.themeId, size: state.size });
+function openPay(reason) {
+  const cur = themeById(state.themeId);
+  const freeTheme = cur.pro ? 'clean' : state.themeId;
+  const proTheme = cur.pro ? state.themeId : (THEMES.find((t) => t.pro) || cur).id;
+  const W = 300, H = Math.round(300 * 2556 / 1179);
+  openModal('payModal');
+  renderBoard($('#cmpFree'), { ...state, themeId: freeTheme }, { width: W, height: H, watermark: true });
+  renderBoard($('#cmpPro'), { ...state, themeId: proTheme }, { width: W, height: H, watermark: false });
+  const strip = $('#proStrip');
+  if (!strip.childElementCount) {
+    THEMES.filter((t) => t.pro).forEach((t) => {
+      const fig = document.createElement('figure'); const c = document.createElement('canvas'); fig.appendChild(c);
+      const cap = document.createElement('figcaption'); cap.textContent = t.name; fig.appendChild(cap); strip.appendChild(fig);
+      renderBoard(c, { ...state, themeId: t.id, userPhotos: [] }, { width: 120, height: 260 });
+    });
+  }
+  track('paywall_view', { theme: state.themeId, size: state.size, reason: reason || '' });
 }
 $$('.unlock-btn').forEach((b) => b.addEventListener('click', () => {
   track('unlock_click');

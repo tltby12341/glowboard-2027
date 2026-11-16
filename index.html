@@ -204,20 +204,37 @@
       <a class="pill" id="waLink" target="_blank" rel="noopener">WhatsApp</a>
     </div>
     <div class="howto"><strong data-i18n="modal_set">How to set it</strong><p data-i18n="modal_set_ios"></p><p data-i18n="modal_set_and"></p></div>
-    <div class="upsell" id="resultUpsell"><span data-i18n="pay_sub"></span> <button class="link-btn unlock-btn" type="button" data-i18n="unlock">Unlock Pro</button></div>
+    <div class="upsell2" id="resultUpsell">
+      <canvas id="upsellCv" aria-hidden="true"></canvas>
+      <div><strong>Love it? Make it clean.</strong><p>Remove the watermark and unlock all 8 looks, 4K and print sizes. <span class="pro-price">$4.99</span> once.</p><button class="btn btn-dark up-btn" type="button" id="upsellBtn">See Pro</button></div>
+    </div>
     <a class="link-btn" href="#make" data-close data-i18n="modal_bestie">Make one for your bestie →</a>
   </div>
 </div>
 
-<div class="modal" id="payModal" role="dialog" aria-modal="true">
-  <div class="sheet narrow">
+<div class="modal" id="payModal" role="dialog" aria-modal="true" aria-labelledby="payTitle">
+  <div class="sheet pay-sheet">
     <button class="close" type="button" data-close aria-label="Close">×</button>
-    <div class="pay-art" id="payArt"></div>
-    <h3 data-i18n="pay_title">This one is Pro ✨</h3>
-    <p class="hint" data-i18n="pay_sub"></p>
-    <button class="btn btn-primary wide unlock-btn" type="button"><span data-i18n="unlock">Unlock Pro</span> · <span class="pro-price">$4.99</span></button>
-    <button class="link-btn" id="freeAlt" type="button" data-i18n="pay_free_alt">Or switch to a free look</button>
-    <button class="link-btn code-btn" type="button" data-i18n="have_code">Already bought? Enter your code</button>
+    <p class="eyebrow">Glowboard Pro</p>
+    <h3 id="payTitle">Get this look, <em>watermark-free</em></h3>
+    <div class="compare">
+      <figure><div class="cmp-phone"><canvas id="cmpFree"></canvas></div><figcaption>Free</figcaption></figure>
+      <div class="cmp-arrow" aria-hidden="true">→</div>
+      <figure class="pro"><div class="cmp-phone"><canvas id="cmpPro"></canvas><span class="cmp-tag">PRO</span></div><figcaption>Pro</figcaption></figure>
+    </div>
+    <ul class="pay-list">
+      <li><b>All 8 looks</b>, plus every new look we add</li>
+      <li><b>No watermark</b> on any download</li>
+      <li><b>Desktop 4K &amp; printable A4</b> sizes</li>
+      <li><b>30 daily affirmation</b> lock screens</li>
+    </ul>
+    <div class="pro-strip" id="proStrip" aria-hidden="true"></div>
+    <button class="btn btn-primary wide unlock-btn pay-cta" type="button">Unlock Pro · <span class="pro-price">$4.99</span> one-time</button>
+    <p class="trust"><span>🔒 Secure checkout by Gumroad</span><span>⚡ Instant unlock</span><span>↩︎ 7-day refund</span></p>
+    <div class="pay-links">
+      <button class="link-btn" id="freeAlt" type="button">Use a free look instead</button>
+      <button class="link-btn code-btn" type="button">Already bought? Enter code</button>
+    </div>
   </div>
 </div>
 
