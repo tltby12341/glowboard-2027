@@ -10,7 +10,7 @@ window.GLOWBOARD_CONFIG = {
   // 2) In your payment product settings, set the redirect / thank-you URL to:
   //       https://tltby12341.github.io/glowboard-2027/?unlock=YOUR_SECRET_CODE
   //    then open /unlock-helper.html, type YOUR_SECRET_CODE, and paste the SHA-256 result below.
-  UNLOCK_CODE_SHA256: "",
+  UNLOCK_CODE_SHA256: "dd69ed182547ee8ebba68f21560cd9c84b58251f9f05709f0fdb4265202a9eed",
 
   TIP_URL: "",
 
