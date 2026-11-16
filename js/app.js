@@ -360,6 +360,17 @@ function openPay(reason) {
   strip.querySelectorAll('figure').forEach((f, i) => f.classList.toggle('on', THEMES.filter((t) => t.pro)[i].id === proTheme));
   track('paywall_view', { theme: state.themeId, size: state.size, reason: reason || '' });
 }
+$$('.gift-btn').forEach((b) => b.addEventListener('click', () => {
+  track('gift_pro_click');
+  if (CFG.PRO_PAYMENT_URL) window.open(CFG.PRO_PAYMENT_URL + (CFG.PRO_PAYMENT_URL.includes('?') ? '&' : '?') + 'wanted=true', '_blank', 'noopener');
+  else location.href = `mailto:${CFG.CONTACT_EMAIL}?subject=${encodeURIComponent('Gift Glowboard Pro')}`;
+}));
+$('#giftFreeBtn').addEventListener('click', () => {
+  track('gift_free_click');
+  if (state.title === '2027') { state.title = 'Your 2027'; $('#titleInput').value = state.title; schedule(false); }
+  $('#make').scrollIntoView({ behavior: 'smooth' });
+  setTimeout(() => toast('Design it for them, then tap “Send this board to a friend” 💌'), 700);
+});
 $$('.unlock-btn').forEach((b) => b.addEventListener('click', () => {
   track('unlock_click');
   if (CFG.PRO_PAYMENT_URL) window.open(CFG.PRO_PAYMENT_URL, '_blank', 'noopener');
