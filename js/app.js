@@ -316,6 +316,7 @@ $('#saveLink').addEventListener('click', async (e) => {
   }
   track('save_image', { via: useShareSave ? 'fallback' : 'download' });
 });
+$('#saveLink').addEventListener('click', () => { savedFree = !isPro; });
 $('#shareBtn').addEventListener('click', async () => {
   try {
     const file = new File([lastBlob], 'glowboard-2027.png', { type: 'image/png' });
@@ -471,7 +472,41 @@ $('#affBtn').addEventListener('click', () => {
 
 // ---------- modal / toast / confetti ----------
 function openModal(id) { $('#' + id).classList.add('open'); document.body.style.overflow = 'hidden'; }
-function closeModals() { $$('.modal.open').forEach((m) => m.classList.remove('open')); document.body.style.overflow = ''; }
+function closeModals() {
+  const wasResult = $('#resultModal').classList.contains('open');
+  $$('.modal.open').forEach((m) => m.classList.remove('open')); document.body.style.overflow = '';
+  if (wasResult && savedFree) setTimeout(() => showNudge('saved'), 900);
+}
+// ---------- tasteful nudge: once per session, free users only, after a save or on desktop exit intent ----------
+let savedFree = false, engaged = false;
+function nudgeAllowed() { try { return !isPro && !sessionStorage.getItem('gb_nudge') && !document.querySelector('.modal.open'); } catch (e) { return false; } }
+function showNudge(kind) {
+  if (!nudgeAllowed()) return;
+  try { sessionStorage.setItem('gb_nudge', kind); } catch (e) {}
+  const n = $('#nudge');
+  if (kind === 'exit') {
+    $('#nudgeTitle').textContent = 'Your 2027 board is one tap away';
+    $('#nudgeText').innerHTML = 'Save the free version now, or go watermark-free with all 16 looks. <span class="pro-price">$4.99</span> once.';
+    $('#nudgeGo').textContent = 'Save my board';
+  }
+  const cv = $('#nudgeCv'); const pt = THEMES.find((t) => t.id === state.themeId);
+  renderBoard(cv, state, { width: 116, height: 252, watermark: false });
+  n.hidden = false; requestAnimationFrame(() => n.classList.add('show'));
+  n.dataset.kind = kind; track('nudge_view', { kind, theme: pt ? pt.id : '' });
+}
+function hideNudge() { const n = $('#nudge'); n.classList.remove('show'); setTimeout(() => { n.hidden = true; }, 320); }
+$('#nudgeGo').addEventListener('click', () => {
+  const kind = $('#nudge').dataset.kind; hideNudge(); track('nudge_click', { kind });
+  if (kind === 'exit') { $('#make').scrollIntoView({ behavior: 'smooth' }); setTimeout(download, 400); } else openPay('nudge_' + kind);
+});
+$('#nudgeNo').addEventListener('click', () => { hideNudge(); track('nudge_dismiss'); });
+$('#nudgeX').addEventListener('click', hideNudge);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#nudge').hidden) hideNudge(); });
+['#themeGrid', '#vibes', '#chips', '#downloadBtn'].forEach((sel) => { const el = $(sel); if (el) el.addEventListener('click', () => { engaged = true; }, { capture: true }); });
+// desktop only: the cursor leaving through the top edge (toward tabs / close)
+document.addEventListener('mouseout', (e) => {
+  if (!e.relatedTarget && e.clientY <= 4 && window.innerWidth >= 900 && engaged && !savedFree && performance.now() > 20000) showNudge('exit');
+});
 $$('.modal').forEach((m) => m.addEventListener('click', (e) => { if (e.target === m || e.target.closest('[data-close]')) closeModals(); }));
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModals(); });
 let toastTimer;
