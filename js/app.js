@@ -547,6 +547,12 @@ $('#contactLink').href = 'mailto:' + CFG.CONTACT_EMAIL; $('#contactLink').textCo
 if (CFG.TIP_URL) $$('.tip-link').forEach((a) => { a.href = CFG.TIP_URL; a.hidden = false; });
 if (CFG.ANALYTICS_SNIPPET_URL) { const s = document.createElement('script'); s.defer = true; s.src = CFG.ANALYTICS_SNIPPET_URL; if (CFG.ANALYTICS_DOMAIN) s.dataset.domain = CFG.ANALYTICS_DOMAIN; document.head.appendChild(s); }
 
+function showReveal() {
+  const cv = $('#revealCv'); renderBoard(cv, state, { width: 440, height: Math.round(440 * 2556 / 1179), watermark: !isPro });
+  openModal('revealModal');
+}
+$('#revealSave').addEventListener('click', () => { closeModals(); track('reveal_save', { theme: state.themeId }); download(); });
+$('#revealEdit').addEventListener('click', () => { closeModals(); track('reveal_edit'); $('#make').scrollIntoView({ behavior: 'smooth' }); });
 (async function init() {
   let sharedLoaded = false;
   if (params.get('b')) { const sh = decodeBoard(params.get('b')); if (sh) { Object.assign(state, sh); sharedLoaded = true; } }
@@ -562,6 +568,6 @@ if (CFG.ANALYTICS_SNIPPET_URL) { const s = document.createElement('script'); s.d
   }
   await loadManifest(); await ensureFonts();
   await renderPreview(); renderHero(); renderThumbs();
-  if (sharedLoaded || look) { track(sharedLoaded ? 'template_open' : 'look_open', { theme: state.themeId }); if (sharedLoaded) toast('Board loaded. Tweak it and make it yours ✨'); }
+  if (sharedLoaded || look) { track(sharedLoaded ? 'template_open' : 'look_open', { theme: state.themeId }); if (sharedLoaded) showReveal(); }
   let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { renderPreview(); renderHero(); }, 200); });
 })();
