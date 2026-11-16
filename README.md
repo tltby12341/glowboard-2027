@@ -6,10 +6,10 @@ Glowboard is a static site (plain HTML, CSS and JS) hosted on GitHub Pages. User
 
 ## Business model
 - **Free:** 3 aesthetics (Clean Girl, Coquette, Old Money) and iPhone/Android PNGs with a small "glowboard · make yours free" watermark. The watermark is the viral loop.
-- **Pro ($4.99, one-time):** all 16 aesthetics, no watermark, Desktop 4K, iPad and A4 print sizes, 30 daily affirmation lock screens, a matching (blurred) home screen, a printable A4 2027 goals checklist, and a one-tap "2027 set" .zip that includes a 5-tile widget pack.
+- **Pro ($4.99, one-time):** all 18 aesthetics, no watermark, Desktop 4K, iPad and A4 print sizes, 30 daily affirmation lock screens, a matching (blurred) home screen, a printable A4 2027 goals checklist, and a one-tap "2027 set" .zip that includes a 5-tile widget pack.
 
 ## Features
-- 16 looks (3 free, 13 Pro), 19 goal categories with 152 affirmations, and 8 one-tap "quick start" vibes.
+- 18 looks (3 free, 15 Pro), 19 goal categories with 152 affirmations, and 11 one-tap "quick start" vibes.
 - Title styles (Serif, Script, Bold, Handwritten), tap-to-swap photos, and your own photos (kept on the device).
 - Sizes: iPhone, Android, IG/TikTok story (free); Desktop 4K, iPad, Print A4 (Pro).
 - iPhone-safe saving: Save to Photos via the share sheet, with long-press guidance in in-app browsers.
@@ -17,7 +17,7 @@ Glowboard is a static site (plain HTML, CSS and JS) hosted on GitHub Pages. User
 - Tasteful nudges, shown once per session and never to Pro users: an upgrade card after a free save, and a desktop exit-intent reminder.
 - Mobile: the looks are shown as a 2-row swipeable shelf.
 - Shareable template links: `?b=<base64url JSON>` rebuilds a board. Deep links: `?look=<themeId>` and `?goals=travel,money`.
-- SEO: `/ideas/` hub, 16 aesthetic landing pages, 5 topic pages (ideas for women, manifestation lock screen, 2027 goals list, free template, gift), a 152-affirmation page and 2 guides. Each has JSON-LD and its own OG image. The sitemap lists 26 URLs.
+- SEO: `/ideas/` hub, 18 aesthetic landing pages, 5 topic pages (ideas for women, manifestation lock screen, 2027 goals list, free template, gift), a 152-affirmation page and 2 guides. Each has JSON-LD and its own OG image. The sitemap lists 28 URLs.
 
 ## Turn on payments (about 15 minutes)
 1. Create a digital product called "Glowboard Pro" priced at $4.99 on **Gumroad** (easiest), **Lemon Squeezy**, or a **Stripe Payment Link**.

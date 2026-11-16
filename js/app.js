@@ -234,7 +234,7 @@ async function renderPreview() {
   const t = themeById(state.themeId);
   dev.classList.toggle('is-pro', t.pro && !isPro);
   updateDlLabel();
-  dev.classList.toggle('light', !['oldmoney', 'darkluxe', 'mobwife', 'cozywinter', 'academia'].includes(t.id));
+  dev.classList.toggle('light', !['oldmoney', 'darkluxe', 'mobwife', 'cozywinter', 'academia', 'film', 'celestial'].includes(t.id));
   await renderBoard(cv, state, { width: w, height: h, kind: sz.kind, watermark: !isPro });
   const ft = $('#fabThumb canvas');
   if (ft) { ft.width = 96; ft.height = Math.round(96 * h / w); ft.getContext('2d').drawImage(cv, 0, 0, ft.width, ft.height); }
@@ -549,7 +549,7 @@ function showNudge(kind) {
   const n = $('#nudge');
   if (kind === 'exit') {
     $('#nudgeTitle').textContent = 'Your 2027 board is one tap away';
-    $('#nudgeText').innerHTML = 'Save the free version now, or go watermark-free with all 16 looks. <span class="pro-price">$4.99</span> once.';
+    $('#nudgeText').innerHTML = 'Save the free version now, or go watermark-free with all 18 looks. <span class="pro-price">$4.99</span> once.';
     $('#nudgeGo').textContent = 'Save my board';
   }
   const cv = $('#nudgeCv'); const pt = THEMES.find((t) => t.id === state.themeId);

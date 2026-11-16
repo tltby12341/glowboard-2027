@@ -236,6 +236,10 @@ function drawBackground(ctx, t, W, H, r) {
     ctx.fillStyle = 'rgba(255,255,255,0.13)'; const s = u * 7;
     for (let y = 0, row = 0; y < H; y += s, row++) for (let x = (row % 2) * s; x < W; x += s * 2) ctx.fillRect(x, y, s, s);
   }
+  if (t.pattern === 'stars') {
+    for (let i = 0; i < 380; i++) { ctx.fillStyle = `rgba(255,248,230,${0.12 + r() * 0.55})`; ctx.beginPath(); ctx.arc(r() * W, r() * H, u * (0.06 + r() * 0.22), 0, Math.PI * 2); ctx.fill(); }
+    for (let i = 0; i < 26; i++) sticker(ctx, 'star4', r() * W, r() * H, u * (0.5 + r() * 0.9), `rgba(227,194,122,${0.35 + r() * 0.4})`, 0);
+  }
   if (t.pattern === 'grid') {
     ctx.strokeStyle = 'rgba(90,120,160,0.13)'; ctx.lineWidth = Math.max(1, u * 0.12); const s = u * 4;
     ctx.beginPath(); for (let x = 0; x < W; x += s) { ctx.moveTo(x, 0); ctx.lineTo(x, H); } for (let y = 0; y < H; y += s) { ctx.moveTo(0, y); ctx.lineTo(W, y); } ctx.stroke();
@@ -529,6 +533,38 @@ function drawPhoto(ctx, t, it, w, h, u, lang, r) {
     }
     case 'square': {
       ctx.save(); ctx.beginPath(); ctx.rect(0, 0, w, h); ctx.clip(); imgOrPlaceholder(ctx, t, it, 0, 0, w, h, u); ctx.restore();
+      break;
+    }
+    case 'film': { // 35mm negative strip: black frame, sprocket holes, warm tone, orange date stamp
+      const m = Math.min(w, h), hs = Math.max(u * 1.6, m * 0.1), sp = u * 0.7;
+      shadowOn(ctx, t, u); ctx.fillStyle = '#0C0B0A'; ctx.fillRect(0, 0, w, h); shadowOff(ctx);
+      ctx.fillStyle = 'rgba(244,232,212,0.88)';
+      const hw = hs * 0.42, hh = hs * 0.48, step = hw * 2.1;
+      for (let x = step * 0.4; x + hw < w; x += step) { rr(ctx, x, hs * 0.26, hw, hh, hw * 0.22); ctx.fill(); rr(ctx, x, h - hs * 0.26 - hh, hw, hh, hw * 0.22); ctx.fill(); }
+      const px = sp, py = hs, pw = w - sp * 2, ph = h - hs * 2;
+      ctx.save(); ctx.beginPath(); ctx.rect(px, py, pw, ph); ctx.clip(); imgOrPlaceholder(ctx, t, it, px, py, pw, ph, u);
+      ctx.fillStyle = 'rgba(255,160,80,0.13)'; ctx.fillRect(px, py, pw, ph);
+      const fade = ctx.createLinearGradient(0, py, 0, py + ph); fade.addColorStop(0, 'rgba(40,20,10,0.18)'); fade.addColorStop(0.3, 'rgba(40,20,10,0)'); fade.addColorStop(1, 'rgba(40,20,10,0.22)');
+      ctx.fillStyle = fade; ctx.fillRect(px, py, pw, ph);
+      if (r() < 0.6) {
+        const fs = Math.max(u * 1.1, Math.min(pw, ph) * 0.085);
+        ctx.font = fontStr(fs, '"Courier New", ui-monospace, monospace', { weight: 700 });
+        ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic';
+        ctx.shadowColor = 'rgba(255,110,40,0.85)'; ctx.shadowBlur = fs * 0.5; ctx.fillStyle = '#FF8A3D';
+        ctx.fillText(`'27 ${1 + Math.floor(r() * 12)} ${1 + Math.floor(r() * 28)}`, px + pw - fs * 0.6, py + ph - fs * 0.6);
+      }
+      ctx.restore();
+      break;
+    }
+    case 'arch': { // arched window frame with a thin gold line
+      const ar = Math.min(w / 2, h * 0.55);
+      const arch = (x, y, ww, hh, rr2) => { ctx.beginPath(); ctx.moveTo(x, y + hh); ctx.lineTo(x, y + rr2); ctx.ellipse(x + ww / 2, y + rr2, ww / 2, rr2, 0, Math.PI, 0); ctx.lineTo(x + ww, y + hh); ctx.closePath(); };
+      shadowOn(ctx, t, u); ctx.fillStyle = '#0E1130'; arch(0, 0, w, h, ar); ctx.fill(); shadowOff(ctx);
+      ctx.save(); arch(0, 0, w, h, ar); ctx.clip(); imgOrPlaceholder(ctx, t, it, 0, 0, w, h, u);
+      const gl = ctx.createLinearGradient(0, 0, 0, h); gl.addColorStop(0, 'rgba(40,40,120,0.0)'); gl.addColorStop(1, 'rgba(20,20,70,0.28)');
+      ctx.fillStyle = gl; ctx.fillRect(0, 0, w, h); ctx.restore();
+      const ins = u * 0.8; ctx.strokeStyle = t.line; ctx.lineWidth = u * 0.24;
+      arch(ins, ins, w - ins * 2, h - ins * 2, Math.max(1, ar - ins)); ctx.stroke();
       break;
     }
     default: { // rounded

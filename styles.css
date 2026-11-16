@@ -381,3 +381,12 @@ details p{margin:0 0 18px;color:var(--ink2)}
 .free-peek img{width:62px;height:auto;border-radius:10px;border:2px solid #1D1B1A;box-shadow:0 10px 20px -12px rgba(60,40,20,.5)}
 .free-peek img:nth-child(1){transform:rotate(-5deg)}.free-peek img:nth-child(3){transform:rotate(5deg)}
 .footer .fbrand .logo{justify-content:flex-start;margin:0}
+
+/* paywall: calmer trust row, CTA always reachable on phones */
+.trust span{display:inline-flex;align-items:center;gap:6px}
+.trust span::before{content:"";width:14px;height:14px;flex:none;background:no-repeat center/14px url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239C7A3C' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E")}
+@media (max-width:640px){
+  .pay-sticky{position:sticky;bottom:-22px;margin:0 -26px;padding:14px 26px 12px;background:linear-gradient(to top,var(--cream,#FBF7F2) 78%,rgba(251,247,242,0));z-index:3}
+  .cmp-phone{width:min(124px,31vw)}
+  .pay-sheet .pro-strip canvas{max-height:120px}
+}

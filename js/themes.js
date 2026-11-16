@@ -208,6 +208,32 @@ export const THEMES = [
     stickers: ['star5', 'heart', 'flower', 'pin', 'sparkle4'], stickerColors: ['#D9573F', '#F2B6C6', '#F6D365', '#2A2421', '#5B8DB8'], stickerCount: 10,
     shadow: 'rgba(40,30,20,0.3)',
   },
+  {
+    id: 'film', name: '35mm Film', pro: true,
+    bg: ['#1E1B19', '#121110'], grain: 0.14, glow: 'rgba(255,150,70,0.10)',
+    ink: '#F1E6D2', accent: '#FF8A3D', soft: '#2A2623',
+    titleFont: '"Instrument Serif", "Songti SC", serif', titleItalic: true,
+    wordFont: '"Courier New", ui-monospace, monospace', wordItalic: false, wordCaps: true, wordTracking: 0.35,
+    textFont: '"Courier New", ui-monospace, monospace', textWeight: 700, textScale: 0.82,
+    labelFont: '"Courier New", ui-monospace, monospace',
+    card: '#EFE6D6', cardInk: '#2A2420',
+    frame: 'film', radius: 0, rotate: 1.5, gap: 1.8, warm: true,
+    stickers: ['star4'], stickerColors: ['#FF8A3D'], stickerCount: 3,
+    shadow: 'rgba(0,0,0,0.55)',
+  },
+  {
+    id: 'celestial', name: 'Celestial', pro: true,
+    bg: ['#1B2047', '#0E1130', '#1A1440'], grain: 0.04, pattern: 'stars', glow: 'rgba(160,150,255,0.16)',
+    ink: '#F4E9CF', accent: '#E3C27A', soft: '#232857',
+    titleFont: '"Pinyon Script", "Instrument Serif", serif', titleItalic: false, titleScale: 1.12, titleGold: true,
+    wordFont: '"Inter", sans-serif', wordItalic: false, wordCaps: true, wordTracking: 0.42,
+    textFont: '"Instrument Serif", "Songti SC", serif',
+    labelFont: '"Inter", "PingFang SC", sans-serif',
+    card: 'rgba(20,24,60,0.78)', cardInk: '#F4E9CF', cardStroke: '#E3C27A',
+    frame: 'arch', line: '#E3C27A', radius: 1.4, rotate: 0, gap: 1.8,
+    stickers: ['sparkle', 'star4'], stickerColors: ['#E3C27A', '#F4E9CF'], stickerCount: 7,
+    shadow: 'rgba(0,0,10,0.55)',
+  },
 ];
 
 export const themeById = (id) => THEMES.find(t => t.id === id) || THEMES[0];
