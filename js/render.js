@@ -210,6 +210,34 @@ function drawBackground(ctx, t, W, H, r) {
     for (let y = step / 2, row = 0; y < H; y += step, row++)
       for (let x = (row % 2 ? step / 2 : 0) + step / 4; x < W; x += step) { ctx.beginPath(); ctx.arc(x, y, u * 0.55, 0, Math.PI * 2); ctx.fill(); }
   }
+  if (t.pattern === 'leopard') {
+    for (let i = 0; i < 260; i++) {
+      const x = r() * W, y = r() * H, s = u * (1.2 + r() * 1.6), a = r() * Math.PI;
+      ctx.save(); ctx.translate(x, y); ctx.rotate(a);
+      ctx.fillStyle = 'rgba(190,130,70,0.10)'; ctx.beginPath(); ctx.ellipse(0, 0, s, s * 0.7, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = 'rgba(0,0,0,0.35)'; ctx.lineWidth = s * 0.32; ctx.lineCap = 'round';
+      for (let k = 0; k < 3; k++) { const b = k * 2.1 + r() * 0.6; ctx.beginPath(); ctx.arc(0, 0, s, b, b + 1.1); ctx.stroke(); }
+      ctx.restore();
+    }
+  }
+  if (t.pattern === 'snow') {
+    for (let i = 0; i < 420; i++) {
+      ctx.fillStyle = `rgba(255,255,255,${0.15 + r() * 0.45})`;
+      ctx.beginPath(); ctx.arc(r() * W, r() * H, u * (0.12 + r() * 0.45), 0, Math.PI * 2); ctx.fill();
+    }
+  }
+  if (t.pattern === 'stripes') {
+    ctx.fillStyle = 'rgba(62,141,184,0.10)'; const sw = u * 4;
+    for (let x = 0; x < W; x += sw * 2) ctx.fillRect(x, 0, sw, H);
+  }
+  if (t.pattern === 'pearls') {
+    for (let i = 0; i < 70; i++) {
+      const x = r() * W, y = r() * H, s = u * (0.5 + r() * 0.9);
+      const pg = ctx.createRadialGradient(x - s * 0.3, y - s * 0.3, s * 0.1, x, y, s);
+      pg.addColorStop(0, 'rgba(255,255,255,0.9)'); pg.addColorStop(1, 'rgba(230,200,195,0.35)');
+      ctx.fillStyle = pg; ctx.beginPath(); ctx.arc(x, y, s, 0, Math.PI * 2); ctx.fill();
+    }
+  }
   if (t.cork) {
     for (let i = 0; i < 900; i++) {
       ctx.fillStyle = r() > 0.5 ? 'rgba(90,60,30,0.18)' : 'rgba(255,240,210,0.18)';
@@ -267,6 +295,8 @@ export function buildItems(state, manifest, lang) {
     return { type: 'photo', src: 'assets/img/' + list[Math.floor(r() * list.length)], cat };
   };
   goals.forEach((g) => photos.push(pickFrom(g)));
+  const th = themeById(state.themeId);
+  if (th.mood && manifest && manifest[th.mood] && !goals.includes(th.mood)) photos.splice(Math.min(1, photos.length), 0, pickFrom(th.mood));
   // second image for categories with more images, to fill
   const fillers = ['travel', 'selfcare', 'home', 'health', 'money', 'nature', 'love', 'growth'];
   let fi = Math.floor(r() * fillers.length);

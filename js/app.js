@@ -17,6 +17,13 @@ const ICONS = {
   book: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5"/>', glass: '<path d="M8 3h8l-1 7a3 3 0 0 1-6 0zM12 13v7M8 21h8"/>',
   mountain: '<path d="M3 20l6-11 4 7 3-4 5 8z"/>', paw: '<circle cx="7" cy="10" r="1.6"/><circle cx="17" cy="10" r="1.6"/><circle cx="10" cy="6" r="1.6"/><circle cx="14" cy="6" r="1.6"/><path d="M12 12c-3 0-5 4-5 6s2 2 5 1 5 1 5-1-2-6-5-6z"/>',
   car: '<path d="M3 16v-3l2-5h14l2 5v3z"/><circle cx="7.5" cy="16.5" r="1.8"/><circle cx="16.5" cy="16.5" r="1.8"/>',
+  hanger: '<path d="M12 7a2 2 0 1 1 2-2c0 1.2-2 1.5-2 3l9 7.5a1 1 0 0 1-.6 1.8H3.6a1 1 0 0 1-.6-1.8L12 8"/>',
+  lips: '<path d="M2 12c3-4 6-5 10-2 4-3 7-2 10 2-3 4-6 6-10 6s-7-2-10-6z"/><path d="M2 12h20"/>',
+  brush: '<path d="M14 4l6 6-8 8-6-6z"/><path d="M6 12l-3 3c-1 2 0 5 0 5s3 1 5 0l3-3"/>',
+  cap: '<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c3 2 9 2 12 0v-5"/><path d="M22 9v6"/>',
+  box: '<path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/>',
+  moon: '<path d="M20 14A8 8 0 1 1 10 4a6 6 0 0 0 10 10z"/>',
+  cup: '<path d="M4 9h13v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H17M8 3c0 1.5 1 1.5 1 3M12 3c0 1.5 1 1.5 1 3"/>',
 };
 
 const state = {
@@ -231,9 +238,13 @@ function openPay(reason) {
     THEMES.filter((t) => t.pro).forEach((t) => {
       const fig = document.createElement('figure'); const c = document.createElement('canvas'); fig.appendChild(c);
       const cap = document.createElement('figcaption'); cap.textContent = t.name; fig.appendChild(cap); strip.appendChild(fig);
+      fig.tabIndex = 0; fig.setAttribute('role', 'button'); fig.setAttribute('aria-label', 'Preview ' + t.name);
+      const pick = () => { strip.querySelectorAll('figure').forEach((f) => f.classList.toggle('on', f === fig)); renderBoard($('#cmpPro'), { ...state, themeId: t.id }, { width: W, height: H, watermark: false }); track('paywall_style', { theme: t.id }); };
+      fig.addEventListener('click', pick); fig.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } });
       renderBoard(c, { ...state, themeId: t.id, userPhotos: [] }, { width: 120, height: 260 });
     });
   }
+  strip.querySelectorAll('figure').forEach((f, i) => f.classList.toggle('on', THEMES.filter((t) => t.pro)[i].id === proTheme));
   track('paywall_view', { theme: state.themeId, size: state.size, reason: reason || '' });
 }
 $$('.unlock-btn').forEach((b) => b.addEventListener('click', () => {

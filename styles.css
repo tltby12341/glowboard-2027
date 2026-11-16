@@ -268,3 +268,9 @@ details p{margin:0 0 18px;color:var(--ink2)}
 .btn.locked{background:linear-gradient(90deg,#3a2e22,#1D1B1A);box-shadow:0 0 0 2px rgba(200,162,107,.55),0 10px 24px -10px rgba(29,27,26,.6)}
 .result-wrap{max-width:none}
 .result-wrap img{width:auto;max-width:220px;max-height:44vh;margin:0 auto}
+
+.pro-strip{overflow-x:auto;justify-content:flex-start;scrollbar-width:none;padding:4px 2px 6px;-webkit-overflow-scrolling:touch}
+.pro-strip::-webkit-scrollbar{display:none}
+.pro-strip figure{flex:none;cursor:pointer;border-radius:12px;transition:transform .2s}
+.pro-strip figure:hover{transform:translateY(-2px)}
+.pro-strip figure.on canvas{outline:2px solid var(--gold,#C8A26B);outline-offset:2px}

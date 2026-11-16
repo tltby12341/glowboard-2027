@@ -6,7 +6,7 @@ Glowboard is a static site (plain HTML, CSS and JS) hosted on GitHub Pages. User
 
 ## Business model
 - **Free:** 3 aesthetics (Clean Girl, Coquette, Old Money) and iPhone/Android PNGs with a small "glowboard · make yours free" watermark. The watermark is the viral loop.
-- **Pro ($4.99, one-time):** all 8 aesthetics, no watermark, Desktop 4K and A4 print sizes, and 30 daily affirmation lock screens.
+- **Pro ($4.99, one-time):** all 12 aesthetics, no watermark, Desktop 4K and A4 print sizes, and 30 daily affirmation lock screens.
 
 ## Turn on payments (about 15 minutes)
 1. Create a digital product called "Glowboard Pro" priced at $4.99 on **Gumroad** (easiest), **Lemon Squeezy**, or a **Stripe Payment Link**.

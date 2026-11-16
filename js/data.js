@@ -12,9 +12,37 @@ export const CATEGORIES = [
   { id: 'nature',   en: 'Nature',       icon: 'mountain' },
   { id: 'pets',     en: 'Pets',         icon: 'paw' },
   { id: 'car',      en: 'Dream car',  icon: 'car' },
+  { id: 'style',    en: 'Style',        icon: 'hanger' },
+  { id: 'glam',     en: 'Glam life',    icon: 'lips' },
+  { id: 'creative', en: 'Creativity',   icon: 'brush' },
+  { id: 'study',    en: 'Study',        icon: 'cap' },
+  { id: 'business', en: 'My business',  icon: 'box' },
+  { id: 'peace',    en: 'Inner peace',  icon: 'moon' },
+  { id: 'cozy',     en: 'Cozy season',  icon: 'cup' },
 ];
 
 export const AFFIRMATIONS = {
+  style: {
+    en: ['My closet feels like me', 'Dressed for the life I want', 'Effortless, every day', 'Quality over quantity', 'I invest in timeless pieces', 'Signature style era', 'Confidence is my best outfit', 'Capsule wardrobe, full life'],
+  },
+  glam: {
+    en: ['Expensive taste, earned', 'Espresso martinis & big dreams', 'I walk in like I own it', 'Red lip, clear vision', 'Glamour is a mindset', 'Fur coat energy', 'I deserve the finer things', 'Soft glam, sharp mind'],
+  },
+  creative: {
+    en: ['I make things every day', 'My art is worth sharing', 'Creativity flows through me', 'Finish the project', 'Paint, write, create', 'I trust my ideas', 'Make it messy, make it mine', 'My sketchbook is full'],
+  },
+  study: {
+    en: ['Straight A energy', 'I graduate in 2027', 'Focused, calm, prepared', 'I pass with flying colors', 'Discipline beats motivation', 'Future me says thank you', 'One page at a time', 'I love learning'],
+  },
+  business: {
+    en: ['My business is booming', 'Orders keep coming in', 'I am my own boss', 'Launch it in 2027', 'My first 1,000 customers', 'Building my brand', 'Profit with purpose', 'Bet on myself'],
+  },
+  peace: {
+    en: ['I am calm and grounded', 'Peace over everything', 'I let go of what I can’t control', 'Breathe in, glow out', 'My energy is sacred', 'Quiet mind, open heart', 'I am exactly where I need to be', 'Grateful for today'],
+  },
+  cozy: {
+    en: ['Slow mornings, warm drinks', 'Cozy is a lifestyle', 'Candles lit, phone down', 'Snow days & good books', 'Home is warm and full', 'Hygge all winter', 'Soft blankets, softer heart', 'Winter cabin weekend'],
+  },
   travel: {
     en: ['I see the world in 2027', 'Passport full, heart fuller', 'Adventure finds me easily', 'New cities, new me', 'I say yes to the trip', 'Sunsets in new places', 'The world is my playground', 'I travel with ease and joy'],
   },
@@ -82,7 +110,7 @@ export const STRINGS = {
     why3_t: 'It makes your phone pretty', why3_d: 'Your phone gets a wallpaper you actually love, and it lines up with your goals.',
     pricing_title: 'Simple pricing', pricing_sub: 'Make and download your board free. Upgrade if you want every look.',
     free_name: 'Free', free_price: '$0', free_f1: '3 aesthetics', free_f2: 'iPhone & Android sizes', free_f3: 'Small "glowboard" mark', free_f4: 'Unlimited shuffles',
-    pro_name: 'Pro', pro_once: 'one-time · yours forever', pro_f1: 'All 8 aesthetics + new drops', pro_f2: 'No watermark', pro_f3: 'Desktop 4K & printable A4', pro_f4: '30 daily-affirmation lock screens', pro_f5: 'Use your own photos in every look',
+    pro_name: 'Pro', pro_once: 'one-time · yours forever', pro_f1: 'All 12 aesthetics + new drops', pro_f2: 'No watermark', pro_f3: 'Desktop 4K & printable A4', pro_f4: '30 daily-affirmation lock screens', pro_f5: 'Use your own photos in every look',
     unlock: 'Unlock Pro', have_code: 'Already bought? Enter your code', tip: 'Or leave a tip',
     soon: 'Join the Pro waitlist',
     faq_title: 'Questions',
