@@ -363,3 +363,21 @@ details p{margin:0 0 18px;color:var(--ink2)}
 .reveal-phone canvas{display:block;width:100%;height:auto}
 @keyframes revealIn{from{transform:translateY(16px) scale(.94) rotate(-3deg);opacity:0}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion:reduce){.reveal-phone{animation:none}}
+
+/* r3 polish */
+.footer{text-align:left;padding:48px clamp(20px,5vw,60px) 120px}
+.footer .fcols{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:28px}
+.footer .fcols b{display:block;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#866536;margin-bottom:10px}
+.footer .fcols nav a{display:block;color:var(--ink2);text-decoration:none;font-size:14px;padding:3px 0}
+.footer .fcols nav a:hover{color:var(--ink);text-decoration:underline}
+.footer .fbrand p{max-width:300px;line-height:1.55}
+.footer .fcopy{max-width:1080px;margin:28px auto 0;font-size:13px}
+@media(max-width:820px){.footer .fcols{grid-template-columns:1fr 1fr}.footer .fbrand{grid-column:1/-1}}
+.themes{align-items:start}
+.theme .tname{min-height:2.6em;align-items:flex-start}
+.theme .tname .badge{flex:none;margin-top:1px}
+@media (min-width:641px){.vibes{-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent);padding-right:40px}}
+.free-peek{display:flex;justify-content:center;gap:10px;margin:22px 0 4px}
+.free-peek img{width:62px;height:auto;border-radius:10px;border:2px solid #1D1B1A;box-shadow:0 10px 20px -12px rgba(60,40,20,.5)}
+.free-peek img:nth-child(1){transform:rotate(-5deg)}.free-peek img:nth-child(3){transform:rotate(5deg)}
+.footer .fbrand .logo{justify-content:flex-start;margin:0}

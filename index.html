@@ -26,7 +26,7 @@
 <script src="config.js"></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
- {"@type":"WebApplication","name":"Glowboard","url":"https://tltby12341.github.io/glowboard-2027/","applicationCategory":"DesignApplication","operatingSystem":"Any (web browser)","description":"Free 2027 vision board maker that creates lock screen wallpapers for iPhone and Android.","featureList":["12 vision board aesthetics","iPhone and Android lock screen sizes","Desktop 4K and printable A4","Printable 2027 goals checklist","Matching home screen wallpaper","Shareable board templates","Photos stay on your device"],"offers":[{"@type":"Offer","price":"0","priceCurrency":"USD","name":"Free"},{"@type":"Offer","price":"4.99","priceCurrency":"USD","name":"Pro (one-time)"}]},
+ {"@type":"WebApplication","name":"Glowboard","url":"https://tltby12341.github.io/glowboard-2027/","applicationCategory":"DesignApplication","operatingSystem":"Any (web browser)","description":"Free 2027 vision board maker that creates lock screen wallpapers for iPhone and Android.","featureList":["16 vision board aesthetics","iPhone and Android lock screen sizes","Desktop 4K and printable A4","Printable 2027 goals checklist","Matching home screen wallpaper","Shareable board templates","Photos stay on your device"],"offers":[{"@type":"Offer","price":"0","priceCurrency":"USD","name":"Free"},{"@type":"Offer","price":"4.99","priceCurrency":"USD","name":"Pro (one-time)"}]},
  {"@type":"FAQPage","mainEntity":[
   {"@type":"Question","name":"Is Glowboard free?","acceptedAnswer":{"@type":"Answer","text":"Yes. Make and download iPhone or Android vision board wallpapers in three looks for free. Pro is a one-time unlock for every look, no watermark and bigger sizes."}},
   {"@type":"Question","name":"Do my photos get uploaded?","acceptedAnswer":{"@type":"Answer","text":"No. Everything runs in your browser and your photos never leave your device."}},
@@ -176,6 +176,7 @@
         <h3 data-i18n="free_name">Free</h3>
         <p class="price"><span data-i18n="free_price">$0</span></p>
         <ul><li data-i18n="free_f1">3 aesthetics</li><li data-i18n="free_f2">iPhone &amp; Android sizes</li><li data-i18n="free_f3">Small "glowboard" mark</li><li data-i18n="free_f4">Unlimited shuffles</li><li>Tap-to-swap photos &amp; title styles</li><li>Share your board as a template</li></ul>
+        <div class="free-peek" aria-hidden="true"><img src="assets/looks/clean-11.webp" alt="" loading="lazy" width="540" height="1170"><img src="assets/looks/coquette-23.webp" alt="" loading="lazy" width="540" height="1170"><img src="assets/looks/oldmoney-37.webp" alt="" loading="lazy" width="540" height="1170"></div>
         <a class="btn btn-ghost wide" href="#make" data-i18n="nav_make">Make yours</a>
       </div>
       <div class="plan pro">
@@ -218,11 +219,13 @@
 </main>
 
 <footer class="footer">
-  <div class="logo small"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 1.5c.6 4.9 2.3 8.6 10.5 10.5-8.2 1.9-9.9 5.6-10.5 10.5C11.4 17.6 9.7 13.9 1.5 12 9.7 10.1 11.4 6.4 12 1.5z" fill="#C8A26B"/></svg><span>glowboard</span></div>
-  <p data-i18n="footer_privacy">Privacy: no accounts and no tracking cookies. Your photos stay on your device.</p>
-  <p><a id="contactLink" href="#">Contact</a> · <a href="guide/how-to-make-a-vision-board.html">How to make a vision board</a> · <a href="guide/vision-board-lock-screen.html">Lock screen guide</a> · <a href="ideas/">Wallpaper ideas</a> · <a href="ideas/2027-affirmations-wallpaper.html">2027 affirmations</a> · <a href="ideas/2027-goals-list.html">2027 goals list</a> · <a href="ideas/vision-board-ideas-for-women.html">Ideas for women</a> · <a href="ideas/manifestation-lock-screen.html">Manifestation lock screen</a> · <a href="ideas/free-vision-board-template.html">Free templates</a> · <a href="ideas/vision-board-gift.html">Gift idea</a></p>
-  <p class="foot-looks"><a href="ideas/coquette-vision-board-wallpaper.html">Coquette</a> · <a href="ideas/old-money-vision-board.html">Old money</a> · <a href="ideas/clean-girl-vision-board.html">Clean girl</a> · <a href="ideas/mob-wife-aesthetic-wallpaper.html">Mob wife</a> · <a href="ideas/dark-luxury-vision-board.html">Dark luxury</a> · <a href="ideas/y2k-vision-board-wallpaper.html">Y2K</a> · <a href="ideas/cozy-winter-wallpaper-iphone.html">Cozy winter</a> · <a href="ideas/coastal-summer-vision-board.html">Coastal</a> · <a href="ideas/soft-glam-wallpaper.html">Soft glam</a> · <a href="ideas/cottagecore-vision-board.html">Cottagecore</a> · <a href="ideas/scrapbook-vision-board.html">Scrapbook</a> · <a href="ideas/minimalist-vision-board.html">Minimalist</a> · <a href="ideas/dark-academia-vision-board.html">Dark academia</a> · <a href="ideas/pink-y2k-wallpaper.html">Pink Y2K</a> · <a href="ideas/old-money-winter-wallpaper.html">Old money winter</a> · <a href="ideas/pinterest-collage-vision-board.html">Pinterest collage</a></p>
-  <p>© 2026 Glowboard</p>
+  <div class="fcols">
+    <div class="fbrand"><div class="logo small"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 1.5c.6 4.9 2.3 8.6 10.5 10.5-8.2 1.9-9.9 5.6-10.5 10.5C11.4 17.6 9.7 13.9 1.5 12 9.7 10.1 11.4 6.4 12 1.5z" fill="#C8A26B"/></svg><span>glowboard</span></div><p data-i18n="footer_privacy">Privacy: no accounts and no tracking cookies. Your photos stay on your device.</p><p><a id="contactLink" href="#">Contact</a></p></div>
+    <nav aria-label="Looks"><b>Looks</b><a href="ideas/coquette-vision-board-wallpaper.html">Coquette</a><a href="ideas/old-money-vision-board.html">Old money</a><a href="ideas/clean-girl-vision-board.html">Clean girl</a><a href="ideas/mob-wife-aesthetic-wallpaper.html">Mob wife</a><a href="ideas/dark-academia-vision-board.html">Dark academia</a><a href="ideas/pink-y2k-wallpaper.html">Pink Y2K</a><a href="ideas/soft-glam-wallpaper.html">Soft glam</a><a href="ideas/">All 16 looks →</a></nav>
+    <nav aria-label="Ideas"><b>Ideas</b><a href="ideas/2027-goals-list.html">2027 goals list</a><a href="ideas/2027-affirmations-wallpaper.html">2027 affirmations</a><a href="ideas/vision-board-ideas-for-women.html">Ideas for women</a><a href="ideas/manifestation-lock-screen.html">Manifestation lock screen</a><a href="ideas/free-vision-board-template.html">Free templates</a><a href="ideas/vision-board-gift.html">Vision board gift</a></nav>
+    <nav aria-label="Guides"><b>Guides</b><a href="guide/how-to-make-a-vision-board.html">How to make a vision board</a><a href="guide/vision-board-lock-screen.html">Lock screen guide</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a></nav>
+  </div>
+  <p class="fcopy">© 2026 Glowboard</p>
 </footer>
 
 <!-- mobile floating bar -->
@@ -242,6 +245,10 @@
       <a class="btn btn-primary" id="saveLink" download="glowboard-2027.png" data-i18n="modal_save">Save image</a>
       <button class="btn btn-soft" id="shareBtn" type="button" data-i18n="modal_share">Share</button>
     </div>
+    <div class="upsell2" id="resultUpsell">
+      <canvas id="upsellCv" aria-hidden="true"></canvas>
+      <div><strong>Love it? Make it clean.</strong><p>No watermark, the matching home screen, all 16 looks and the full 2027 set (iPad, 4K, widgets). <span class="pro-price">$4.99</span> once.</p><button class="btn btn-dark up-btn" type="button" id="upsellBtn">See Pro</button></div>
+    </div>
     <div class="home-teaser" id="homeTeaser">
       <span>📱 Want the matching <b>home screen</b>?</span>
       <button class="pill" id="homeBtn" type="button">Get it <b class="mini-pro">PRO</b></button>
@@ -257,10 +264,7 @@
       <a class="pill" id="waLink" target="_blank" rel="noopener">WhatsApp</a>
     </div>
     <div class="howto"><strong data-i18n="modal_set">How to set it</strong><p data-i18n="modal_set_ios">iPhone: Photos → Share → Use as Wallpaper</p><p data-i18n="modal_set_and">Android: Gallery → ⋮ → Set as wallpaper → Lock screen</p></div>
-    <div class="upsell2" id="resultUpsell">
-      <canvas id="upsellCv" aria-hidden="true"></canvas>
-      <div><strong>Love it? Make it clean.</strong><p>Remove the watermark and unlock all 16 looks, 4K and print sizes. <span class="pro-price">$4.99</span> once.</p><button class="btn btn-dark up-btn" type="button" id="upsellBtn">See Pro</button></div>
-    </div>
+
     <a class="link-btn" href="#make" data-close data-i18n="modal_bestie">Make one for your bestie →</a>
   </div>
 </div>

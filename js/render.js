@@ -28,11 +28,13 @@ export async function loadManifest(base = './') {
 
 export function loadImage(src) {
   if (IMG_CACHE.has(src)) return IMG_CACHE.get(src);
+  // slow networks: never let one stalled photo block a render; retry it next time
   const p = new Promise((resolve) => {
     const im = new Image();
     im.decoding = 'async';
-    im.onload = () => resolve(im);
-    im.onerror = () => resolve(null);
+    const timer = setTimeout(() => { IMG_CACHE.delete(src); resolve(null); }, 9000);
+    im.onload = () => { clearTimeout(timer); resolve(im); };
+    im.onerror = () => { clearTimeout(timer); IMG_CACHE.delete(src); resolve(null); };
     im.src = src;
   });
   IMG_CACHE.set(src, p);
@@ -661,7 +663,7 @@ export async function ensureFonts() {
   const t0 = Date.now();
   while (!Array.from(document.styleSheets).some((s) => (s.href || '').includes('fonts.googleapis')) && Date.now() - t0 < 4000) await new Promise((res) => setTimeout(res, 40));
   const specs = ['400 40px "Instrument Serif"', 'italic 400 40px "Instrument Serif"', '400 40px "Inter"', '600 40px "Inter"', '700 40px "Inter"', '800 40px "Inter"', '400 40px "Caveat"', '700 40px "Caveat"', '400 40px "Pinyon Script"', '800 40px "Syne"'];
-  try { await Promise.all(specs.map((s) => document.fonts.load(s))); } catch (e) {}
+  try { await Promise.race([Promise.all(specs.map((s) => document.fonts.load(s))), new Promise((res) => setTimeout(res, 3500))]); } catch (e) {}
 }
 
 export const SIZES = {

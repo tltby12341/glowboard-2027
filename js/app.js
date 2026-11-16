@@ -62,7 +62,13 @@ const state = {
   size: 'iphone',
 };
 state.word = WORDS[state.lang][0];
-let isPro = previewPro || localStorage.getItem('gb_pro') === '1';
+// storage can be disabled (private modes, in-app browsers, strict settings): never let it break the app
+const store = {
+  get(k) { try { return window.localStorage.getItem(k); } catch (e) { return store.mem[k] || null; } },
+  set(k, v) { try { window.localStorage.setItem(k, v); } catch (e) { store.mem[k] = v; } },
+  mem: {},
+};
+let isPro = previewPro || store.get('gb_pro') === '1';
 const T = (k) => (STRINGS[state.lang] && STRINGS[state.lang][k]) ?? STRINGS.en[k] ?? k;
 
 function track(name, props) { try { window.plausible && window.plausible(name, { props }); window.umami && window.umami.track(name, props); } catch (e) {} }
@@ -261,11 +267,18 @@ async function download() {
   btns.forEach((b) => { b.disabled = true; b.dataset.old = b.innerHTML; b.textContent = T('rendering'); });
   try {
     const sz = SIZES[state.size];
-    const cv = document.createElement('canvas');
-    await renderBoard(cv, state, { width: sz.w, height: sz.h, kind: sz.kind, watermark: !isPro });
-    const blob = await new Promise((res) => cv.toBlob(res, 'image/png'));
+    let blob = null, k = 1;
+    for (const scale of [1, 0.7, 0.5]) {
+      k = scale;
+      blob = await canvasBlob((cv) => renderBoard(cv, state, { width: Math.round(sz.w * scale), height: Math.round(sz.h * scale), kind: sz.kind, watermark: !isPro })).catch(() => null);
+      if (blob) break;
+    }
+    if (!blob) { toast('Your browser ran out of memory. Try again, or use the iPhone size.'); track('download_fail', { size: state.size }); return; }
     showResult(blob, state.size === 'story' ? 'glowboard-2027-story.png' : undefined);
-    track('download_ok', { theme: state.themeId, size: state.size, pro: isPro });
+    if (k < 1) toast('Saved at a lighter size: your browser was low on memory.');
+    track('download_ok', { theme: state.themeId, size: state.size, pro: isPro, scale: k });
+  } catch (e) {
+    toast('Something went wrong. Please try again.'); track('download_fail', { size: state.size });
   } finally {
     btns.forEach((b) => { b.disabled = false; b.innerHTML = b.dataset.old; });
   }
@@ -276,9 +289,10 @@ function showResult(blob, name) {
   $('#resultImg').src = lastUrl; $('#saveLink').href = lastUrl; $('#saveLink').download = name || 'glowboard-2027.png';
   $('#resultUpsell').style.display = isPro ? 'none' : '';
   $('#homeBtn').innerHTML = isPro ? 'Get it' : 'Get it <b class="mini-pro">PRO</b>';
-  $('#homeTeaser').hidden = !!(name && name !== 'glowboard-2027.png') || ['desktop', 'print', 'story', 'ipad'].includes(state.size);
+  // one upsell for free users (the card above); Pro users get the extras as plain actions
+  $('#homeTeaser').hidden = !isPro || !!(name && name !== 'glowboard-2027.png') || ['desktop', 'print', 'story', 'ipad'].includes(state.size);
   $('#setBtn').innerHTML = isPro ? 'Download the set (.zip)' : 'Get the set <b class="mini-pro">PRO</b>';
-  $('#setTeaser').hidden = !!(name && /set|checklist|home/.test(name));
+  $('#setTeaser').hidden = !isPro || !!(name && /set|checklist|home/.test(name));
   if (!isPro) renderBoard($('#upsellCv'), state, { width: 140, height: 303, watermark: false });
   const text = T('share_text');
   const link = templateLink();
@@ -400,12 +414,20 @@ async function tryUnlock(code) {
   if (!code || !CFG.UNLOCK_CODE_SHA256 || !crypto.subtle) return false;
   const h = await sha256(code);
   if (h.toLowerCase() !== CFG.UNLOCK_CODE_SHA256.toLowerCase()) return false;
-  localStorage.setItem('gb_pro', '1'); isPro = true; renderVibes(); confetti(); toast(T('unlocked')); schedule(true); track('unlocked');
+  store.set('gb_pro', '1'); isPro = true; renderVibes(); confetti(); toast(T('unlocked')); schedule(true); track('unlocked');
   return true;
 }
 
 // ---------- affirmation pack ----------
-async function canvasBlob(fn, type = 'image/png', q) { const cv = document.createElement('canvas'); await fn(cv); const b = await new Promise((res) => cv.toBlob(res, type, q)); cv.width = cv.height = 0; return b; }
+const R = (v, k) => Math.max(1, Math.round(v * k));
+async function canvasBlob(fn, type = 'image/png', q) {
+  const cv = document.createElement('canvas');
+  try {
+    await fn(cv);
+    if (!cv.width || !cv.getContext('2d')) return null;
+    return await new Promise((res) => { try { cv.toBlob((b) => res(b && b.size ? b : null), type, q); } catch (e) { res(null); } });
+  } finally { cv.width = cv.height = 0; await new Promise((r) => setTimeout(r, 30)); }
+}
 $('#setBtn').addEventListener('click', async () => {
   track('set_click', { pro: isPro });
   if (!isPro) { closeModals(); openPay('full_set'); return; }
@@ -413,24 +435,47 @@ $('#setBtn').addEventListener('click', async () => {
   try {
     const phone = state.size === 'android' ? SIZES.android : SIZES.iphone;
     const jobs = [
-      ['1-lock-screen.png', (cv) => renderBoard(cv, state, { width: phone.w, height: phone.h, kind: phone.kind, watermark: false })],
-      ['2-home-screen.png', (cv) => renderHome(cv, state, phone.w, phone.h)],
-      ['3-ipad.png', (cv) => renderBoard(cv, state, { width: SIZES.ipad.w, height: SIZES.ipad.h, kind: 'ipad', watermark: false })],
-      ['4-desktop-4k.png', (cv) => renderBoard(cv, state, { width: SIZES.desktop.w, height: SIZES.desktop.h, kind: SIZES.desktop.kind, watermark: false })],
-      ['5-ig-story.png', (cv) => renderBoard(cv, state, { width: SIZES.story.w, height: SIZES.story.h, kind: 'story', watermark: false })],
-      ['6-goals-checklist-a4.png', (cv) => renderChecklist(cv, state)],
+      ['1-lock-screen.png', (cv, k) => renderBoard(cv, state, { width: R(phone.w, k), height: R(phone.h, k), kind: phone.kind, watermark: false })],
+      ['2-home-screen.png', (cv, k) => renderHome(cv, state, R(phone.w, k), R(phone.h, k))],
+      ['3-ipad.png', (cv, k) => renderBoard(cv, state, { width: R(SIZES.ipad.w, k), height: R(SIZES.ipad.h, k), kind: 'ipad', watermark: false })],
+      ['4-desktop-4k.png', (cv, k) => renderBoard(cv, state, { width: R(SIZES.desktop.w, k), height: R(SIZES.desktop.h, k), kind: SIZES.desktop.kind, watermark: false })],
+      ['5-ig-story.png', (cv, k) => renderBoard(cv, state, { width: R(SIZES.story.w, k), height: R(SIZES.story.h, k), kind: 'story', watermark: false })],
+      ['6-goals-checklist-a4.png', (cv, k) => renderChecklist(cv, state, R(2480, k), R(3508, k))],
     ];
     // widget pack: 4 square affirmation tiles + 1 wide word-of-the-year tile (for Photos / Widgetsmith widgets)
     const wAffs = pickAffs(4);
-    wAffs.forEach((txt, i) => jobs.push([`widgets/widget-square-${i + 1}.png`, (cv) => renderWidget(cv, state, txt, 1024, 1024, i + 1)]));
+    wAffs.forEach((txt, i) => jobs.push([`widgets/widget-square-${i + 1}.png`, (cv, k) => renderWidget(cv, state, txt, R(1024, k), R(1024, k), i + 1)]));
     const wWord = (state.word || defaultWord('en', state.seed || 1)).trim();
-    jobs.push(['widgets/widget-wide-word.png', (cv) => renderWidget(cv, state, wWord, 2048, 960, 9, 'Word of the year')]);
-    const files = [];
-    for (let i = 0; i < jobs.length; i++) { b.textContent = `Making ${i + 1}/${jobs.length}…`; files.push({ name: 'glowboard-2027/' + jobs[i][0].replace('.png', '.jpg'), blob: await canvasBlob(jobs[i][1], 'image/jpeg', 0.93) }); }
+    jobs.push(['widgets/widget-wide-word.png', (cv, k) => renderWidget(cv, state, wWord, R(2048, k), R(960, k), 9, 'Word of the year')]);
+    const files = [], lighter = [], skipped = [];
+    for (let i = 0; i < jobs.length; i++) {
+      b.textContent = `Making ${i + 1}/${jobs.length}…`;
+      let blob = null, used = 1;
+      // big canvases can exceed phone memory (esp. iOS Safari): retry smaller instead of failing the whole set
+      for (const k of [1, 0.7, 0.5]) { used = k; blob = await canvasBlob((cv) => jobs[i][1](cv, k), 'image/jpeg', 0.93).catch(() => null); if (blob) break; }
+      const nm = jobs[i][0].replace('.png', '.jpg');
+      if (!blob) { skipped.push(nm); continue; }
+      if (used < 1) lighter.push(nm);
+      files.push({ name: 'glowboard-2027/' + nm, blob });
+    }
+    if (!files.length) { toast('Your browser ran out of memory. Try on a computer, or download sizes one by one.'); track('set_fail'); return; }
+    if (lighter.length || skipped.length) {
+      const note = 'Glowboard 2027 set\n\nYour browser was low on memory, so:\n' + (lighter.length ? '- made at a lighter size: ' + lighter.join(', ') + '\n' : '') + (skipped.length ? '- skipped: ' + skipped.join(', ') + ' (download these one by one from the Size options)\n' : '') + '\nOpen glowboard on a computer for full-size files.\n';
+      files.push({ name: 'glowboard-2027/READ-ME.txt', blob: new Blob([note], { type: 'text/plain' }) });
+    }
     const zip = await makeZip(files);
+    const zfile = new File([zip], 'glowboard-2027-set.zip', { type: 'application/zip' });
+    // iPhone/iPad: the share sheet ("Save to Files") is more reliable than a blob download, especially in in-app browsers
+    if (IS_IOS && navigator.canShare && navigator.canShare({ files: [zfile] })) {
+      try { await navigator.share({ files: [zfile] }); toast('Choose “Save to Files” to keep your set ✨'); track('set_ok', { via: 'share' }); return; }
+      catch (err) { if (err && err.name === 'AbortError') return; }
+    }
+    if (IN_APP) toast('If nothing downloads, tap ⋯ and choose Open in Safari / your browser.');
     const a = document.createElement('a'); a.href = URL.createObjectURL(zip); a.download = 'glowboard-2027-set.zip'; document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 60000);
-    toast('Your 2027 set is downloading ✨'); track('set_ok');
+    if (!IN_APP) toast(skipped.length ? 'Set downloading (some files skipped, see READ-ME) ✨' : 'Your 2027 set is downloading ✨'); track('set_ok', { lighter: lighter.length, skipped: skipped.length });
+  } catch (e) {
+    toast('Something went wrong making the set. Please try again.'); track('set_fail');
   } finally { b.disabled = false; b.innerHTML = old; }
 });
 $('#homeBtn').addEventListener('click', async () => {
