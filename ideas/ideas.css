@@ -26,3 +26,5 @@ details{background:#fff;border:1px solid rgba(0,0,0,.07);border-radius:16px;padd
 .fine{font-size:14px;color:#8a7f77}
 footer{text-align:center;padding:30px 20px 50px;font-size:14px;color:#8a7f77}footer a{color:inherit}
 @media(max-width:640px){.hub{grid-template-columns:repeat(2,1fr)}.affs{columns:1}.phones{gap:8px}.phones img{border-width:3px;border-radius:14px}}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:16px;overflow:hidden;margin:14px 0;font-size:15.5px}th,td{text-align:left;padding:10px 14px;border-bottom:1px solid rgba(0,0,0,.06)}th{background:#f3ece4;font-weight:600}
+ol li::marker{color:#C8A26B;font-weight:700}
