@@ -771,3 +771,27 @@ export async function renderHome(canvas, state, W = 1179, H = 2556) {
   ctx.fillText(word, W / 2, H * 0.78 + 7.5 * u);
   ctx.shadowBlur = 0;
 }
+
+// ---------- widget pack (Pro): square / wide tiles for iOS & Android photo widgets ----------
+export function renderWidget(canvas, state, text, W = 1024, H = 1024, seed = 1, eyebrow = '') {
+  const t = themeById(state.themeId);
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d'); const r = rng(seed * 97 + 3); const u = Math.min(W, H) / 100;
+  drawBackground(ctx, t, W, H, r);
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const gold = t.titleGold ? '#E8CF98' : t.ink;
+  ctx.fillStyle = t.ink; ctx.globalAlpha = 0.65;
+  ctx.font = fontStr(u * 4.2, '"Inter", sans-serif', { weight: 600 });
+  drawTracked(ctx, (eyebrow || ((state.title || '2027').trim() || '2027')).toUpperCase(), W / 2, H * 0.2, 0.3, u * 4.2);
+  ctx.globalAlpha = 1;
+  let size = u * (W > H * 1.5 ? 22 : 13) * (t.textScale || 1);
+  const fo = { weight: t.textWeight || 400, italic: t.wordItalic && !t.textWeight };
+  let lines;
+  for (let k = 0; k < 30; k++) { ctx.font = fontStr(size, t.textFont, fo); lines = wrap(ctx, text, W * 0.8); if (lines.length <= 3 && lines.every((l) => ctx.measureText(l).width <= W * 0.84)) break; size *= 0.92; }
+  const lh = size * 1.12; const y0 = H * 0.54 - (lines.length - 1) * lh / 2;
+  ctx.fillStyle = gold;
+  lines.forEach((l, i) => ctx.fillText(l, W / 2, y0 + i * lh));
+  for (let i = 0; i < 3; i++) sticker(ctx, t.stickers[i % t.stickers.length], W * (0.12 + r() * 0.76), i === 0 ? H * 0.1 : H * (0.84 + r() * 0.06), u * (2.4 + r() * 2), t.stickerColors[i % t.stickerColors.length], (r() - 0.5) * 0.6);
+  drawGrain(ctx, t, W, H);
+  return canvas;
+}

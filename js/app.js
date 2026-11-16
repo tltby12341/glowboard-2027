@@ -1,7 +1,7 @@
 import { CATEGORIES, STRINGS, WORDS, AFFIRMATIONS } from './data.js';
 import { THEMES, themeById } from './themes.js';
 import { makeZip } from './zip.js';
-import { renderBoard, renderAffirmation, ensureFonts, SIZES, loadManifest, renderChecklist, renderHome } from './render.js';
+import { renderBoard, renderAffirmation, ensureFonts, SIZES, loadManifest, renderChecklist, renderHome, renderWidget, defaultWord } from './render.js';
 
 const CFG = Object.assign({ PRO_PAYMENT_URL: '', PRO_PRICE_LABEL: '$4.99', UNLOCK_CODE_SHA256: '', TIP_URL: '', CONTACT_EMAIL: 'hello@example.com' }, window.GLOWBOARD_CONFIG || {});
 const SITE = 'https://tltby12341.github.io/glowboard-2027/';
@@ -416,6 +416,11 @@ $('#setBtn').addEventListener('click', async () => {
       ['5-ig-story.png', (cv) => renderBoard(cv, state, { width: SIZES.story.w, height: SIZES.story.h, kind: 'story', watermark: false })],
       ['6-goals-checklist-a4.png', (cv) => renderChecklist(cv, state)],
     ];
+    // widget pack: 4 square affirmation tiles + 1 wide word-of-the-year tile (for Photos / Widgetsmith widgets)
+    const wAffs = pickAffs(4);
+    wAffs.forEach((txt, i) => jobs.push([`widgets/widget-square-${i + 1}.png`, (cv) => renderWidget(cv, state, txt, 1024, 1024, i + 1)]));
+    const wWord = (state.word || defaultWord('en', state.seed || 1)).trim();
+    jobs.push(['widgets/widget-wide-word.png', (cv) => renderWidget(cv, state, wWord, 2048, 960, 9, 'Word of the year')]);
     const files = [];
     for (let i = 0; i < jobs.length; i++) { b.textContent = `Making ${i + 1}/${jobs.length}…`; files.push({ name: 'glowboard-2027/' + jobs[i][0].replace('.png', '.jpg'), blob: await canvasBlob(jobs[i][1], 'image/jpeg', 0.93) }); }
     const zip = await makeZip(files);
@@ -445,6 +450,15 @@ $('#checklistBtn').addEventListener('click', async () => {
     showResult(blob, 'glowboard-2027-checklist.png'); track('checklist_ok');
   } finally { b.disabled = false; b.textContent = old; }
 });
+function pickAffs(n) {
+  const out = []; const used = new Set();
+  const goals = state.goals.length ? state.goals : Object.keys(AFFIRMATIONS);
+  for (let gi = 0; out.length < n && gi < 200; gi++) {
+    const arr = AFFIRMATIONS[goals[gi % goals.length]][state.lang]; const s = arr[Math.floor(gi / goals.length) % arr.length];
+    if (!used.has(s)) { used.add(s); out.push(s); }
+  }
+  return out;
+}
 $('#affBtn').addEventListener('click', () => {
   const grid = $('#affGrid'); grid.innerHTML = '';
   const pool = [];
