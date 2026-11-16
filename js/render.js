@@ -507,7 +507,7 @@ function drawTextCard(ctx, t, it, w, h, u, lang, r) {
   if (it.label) {
     ctx.font = fontStr(u * 1.7, '"Inter", "PingFang SC", sans-serif', { weight: 600 });
     ctx.globalAlpha = 0.7;
-    drawTracked(ctx, lang === 'zh' ? '2027 目标' : '2027 GOAL', w / 2, y0 - lh / 2 - u * 2.2, 0.25, u * 1.7);
+    drawTracked(ctx, '2027 GOAL', w / 2, y0 - lh / 2 - u * 2.2, 0.25, u * 1.7);
     ctx.globalAlpha = 1;
   }
   ctx.font = fontStr(size, t.textFont, opt);
@@ -530,7 +530,7 @@ function drawTitle(ctx, t, state, box, u, lang, landscape) {
   // label
   ctx.font = fontStr(u * (landscape ? 2.6 : 2.2), t.labelFont === '"Caveat", "Kaiti SC", cursive' ? '"Inter", sans-serif' : t.labelFont, { weight: 600 });
   ctx.fillStyle = t.ink; ctx.globalAlpha = 0.75;
-  drawTracked(ctx, lang === 'zh' ? '愿 景 板' : 'VISION BOARD', cx, baseY - size * 0.86, 0.32, u * 2.2);
+  drawTracked(ctx, 'VISION BOARD', cx, baseY - size * 0.86, 0.32, u * 2.2);
   ctx.globalAlpha = 1;
   ctx.font = fontStr(size, t.titleFont, fo);
   if (t.titleGold) {
@@ -581,7 +581,7 @@ export function renderAffirmation(canvas, themeId, text, seed, W = 1179, H = 255
   drawBackground(ctx, t, W, H, r);
   ctx.fillStyle = t.ink; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.font = fontStr(u * 3, '"Inter", "PingFang SC", sans-serif', { weight: 600 });
-  ctx.globalAlpha = 0.7; drawTracked(ctx, (lang === 'zh' ? '第 ' + day + ' 天' : 'DAY ' + day) + ' · 2027', W / 2, H * 0.42, 0.3, u * 3); ctx.globalAlpha = 1;
+  ctx.globalAlpha = 0.7; drawTracked(ctx, ('DAY ' + day) + ' · 2027', W / 2, H * 0.42, 0.3, u * 3); ctx.globalAlpha = 1;
   let size = u * 11 * (t.textScale || 1);
   const fo = { weight: t.textWeight || 400, italic: t.wordItalic && !t.textWeight };
   let lines;

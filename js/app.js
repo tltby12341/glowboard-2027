@@ -20,7 +20,7 @@ const ICONS = {
 };
 
 const state = {
-  lang: params.get('lang') || localStorage.getItem('gb_lang') || ((navigator.language || '').toLowerCase().startsWith('zh') ? 'zh' : 'en'),
+  lang: 'en',
   goals: ['travel', 'money', 'selfcare', 'love'],
   custom: [],
   themeId: 'clean',
@@ -39,15 +39,13 @@ function track(name, props) { try { window.plausible && window.plausible(name, {
 
 // ---------- i18n ----------
 function applyI18n() {
-  document.documentElement.lang = state.lang === 'zh' ? 'zh-CN' : 'en';
   $$('[data-i18n]').forEach((el) => { const v = T(el.dataset.i18n); if (typeof v === 'string') el.textContent = v; });
   $$('[data-i18n-ph]').forEach((el) => { el.placeholder = T(el.dataset.i18nPh); });
-  $('#langBtn').textContent = state.lang === 'zh' ? 'EN' : '中文';
   $$('.pro-price').forEach((el) => (el.textContent = CFG.PRO_PRICE_LABEL));
   const faq = T('faq');
   $('#faqList').innerHTML = faq.map(([q, a]) => `<details><summary>${q}</summary><p>${a}</p></details>`).join('');
   const d = new Date(2027, 0, 1);
-  const ds = d.toLocaleDateString(state.lang === 'zh' ? 'zh-CN' : 'en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  const ds = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
   $$('.lock .date').forEach((el) => (el.textContent = ds));
   if (!CFG.PRO_PAYMENT_URL) $$('.unlock-btn').forEach((b) => { b.textContent = T('soon'); });
   renderChips();
@@ -86,7 +84,7 @@ $('#surpriseBtn').addEventListener('click', () => {
 
 // ---------- themes ----------
 function buildThemeGrid() {
-  $('#themeGrid').innerHTML = THEMES.map((t) => `<button type="button" class="theme" data-theme="${t.id}"><canvas width="236" height="511"></canvas><span class="tname"><span>${state.lang === 'zh' ? t.zh : t.name}</span><span class="badge ${t.pro ? 'pro' : ''}">${t.pro ? 'PRO' : T('free')}</span></span></button>`).join('');
+  $('#themeGrid').innerHTML = THEMES.map((t) => `<button type="button" class="theme" data-theme="${t.id}"><canvas width="236" height="511"></canvas><span class="tname"><span>${t.name}</span><span class="badge ${t.pro ? 'pro' : ''}">${t.pro ? 'PRO' : T('free')}</span></span></button>`).join('');
   markTheme();
 }
 function markTheme() { $$('.theme').forEach((b) => b.classList.toggle('on', b.dataset.theme === state.themeId)); }
@@ -152,9 +150,9 @@ async function renderPreview() {
 // ---------- hero ----------
 async function renderHero() {
   const presets = [
-    { goals: ['travel', 'selfcare', 'love', 'money', 'home'], themeId: 'coquette', seed: 21, word: state.lang === 'zh' ? '被爱' : 'soft life' },
+    { goals: ['travel', 'selfcare', 'love', 'money', 'home'], themeId: 'coquette', seed: 21, word: 'soft life' },
     { goals: ['career', 'money', 'travel', 'health', 'home'], themeId: 'clean', seed: 8, word: WORDS[state.lang][0] },
-    { goals: ['money', 'car', 'travel', 'career', 'love'], themeId: 'darkluxe', seed: 5, word: state.lang === 'zh' ? '野心' : 'ambition' },
+    { goals: ['money', 'car', 'travel', 'career', 'love'], themeId: 'darkluxe', seed: 5, word: 'ambition' },
   ];
   const cvs = $$('[data-hero]');
   for (const [i, cv] of cvs.entries()) {
@@ -287,12 +285,6 @@ function confetti() {
 }
 
 // ---------- misc ----------
-$('#langBtn').addEventListener('click', () => {
-  const wasDefaultWord = WORDS[state.lang].includes(state.word);
-  state.lang = state.lang === 'zh' ? 'en' : 'zh'; localStorage.setItem('gb_lang', state.lang);
-  if (wasDefaultWord) { state.word = WORDS[state.lang][0]; $('#wordInput').value = state.word; }
-  applyI18n(); buildThemeGrid(); schedule(true); renderHero(); track('lang', { lang: state.lang });
-});
 const fab = $('#fabBar');
 const io = new IntersectionObserver((ents) => { ents.forEach((en) => fab.classList.toggle('show', en.isIntersecting)); }, { threshold: 0.05 });
 io.observe($('#make'));

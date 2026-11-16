@@ -1,73 +1,60 @@
-// Categories, affirmations and UI strings (EN + 简体中文)
+// Categories, affirmations and UI strings (English)
 export const CATEGORIES = [
-  { id: 'travel',   en: 'Travel',     zh: '旅行',   icon: 'plane' },
-  { id: 'money',    en: 'Money',      zh: '财富',   icon: 'coin' },
-  { id: 'career',   en: 'Career',     zh: '事业',   icon: 'bag' },
-  { id: 'home',     en: 'Dream home', zh: '理想的家', icon: 'home' },
-  { id: 'health',   en: 'Health',     zh: '健康',   icon: 'leaf' },
-  { id: 'love',     en: 'Love',       zh: '爱情',   icon: 'heart' },
-  { id: 'selfcare', en: 'Self-care',  zh: '宠爱自己', icon: 'sparkle' },
-  { id: 'growth',   en: 'Growth',     zh: '成长',   icon: 'book' },
-  { id: 'friends',  en: 'Friends',    zh: '朋友',   icon: 'glass' },
-  { id: 'nature',   en: 'Nature',     zh: '自然',   icon: 'mountain' },
-  { id: 'pets',     en: 'Pets',       zh: '萌宠',   icon: 'paw' },
-  { id: 'car',      en: 'Dream car',  zh: '梦想座驾', icon: 'car' },
+  { id: 'travel',   en: 'Travel',       icon: 'plane' },
+  { id: 'money',    en: 'Money',        icon: 'coin' },
+  { id: 'career',   en: 'Career',       icon: 'bag' },
+  { id: 'home',     en: 'Dream home', icon: 'home' },
+  { id: 'health',   en: 'Health',       icon: 'leaf' },
+  { id: 'love',     en: 'Love',         icon: 'heart' },
+  { id: 'selfcare', en: 'Self-care',  icon: 'sparkle' },
+  { id: 'growth',   en: 'Growth',       icon: 'book' },
+  { id: 'friends',  en: 'Friends',      icon: 'glass' },
+  { id: 'nature',   en: 'Nature',       icon: 'mountain' },
+  { id: 'pets',     en: 'Pets',         icon: 'paw' },
+  { id: 'car',      en: 'Dream car',  icon: 'car' },
 ];
 
 export const AFFIRMATIONS = {
   travel: {
     en: ['I see the world in 2027', 'Passport full, heart fuller', 'Adventure finds me easily', 'New cities, new me', 'I say yes to the trip', 'Sunsets in new places', 'The world is my playground', 'I travel with ease and joy'],
-    zh: ['2027，去看更大的世界', '护照盖满，心也装满', '说走就走的旅行', '新的城市，新的自己', '一定要去一次海边', '在远方看日落', '世界是我的游乐场', '旅途顺利又开心'],
   },
   money: {
     en: ['Money flows to me easily', 'I am financially free', 'My savings keep growing', 'Abundance is my normal', 'I am a money magnet', 'I invest in my future', 'Rich in every way', 'I earn more doing what I love'],
-    zh: ['钱会自然流向我', '财务自由正在路上', '存款一直在增长', '丰盛是我的常态', '我是招财体质', '投资未来的自己', '富足，在每个方面', '做喜欢的事也能赚钱'],
   },
   career: {
     en: ["I'm proud of the work I do", 'Dream job energy', 'I lead with confidence', 'Promoted & paid', 'My ideas matter', 'I build something of my own', 'Opportunities find me', 'CEO of my life'],
-    zh: ['为自己的工作骄傲', '拿到理想的offer', '自信地带领团队', '升职加薪', '我的想法很有价值', '做属于自己的事业', '机会主动来找我', '做自己人生的CEO'],
   },
   home: {
     en: ['My dream home is waiting', 'Sunlight, plants & peace', 'A home that feels like me', 'Keys to my own place', 'Cozy, calm, mine', 'I create a beautiful space', 'Home is my sanctuary', 'Soft mornings at home'],
-    zh: ['理想的家在等我', '阳光、绿植和安宁', '一个像我的家', '拿到自己家的钥匙', '温暖、安静、属于我', '把生活过成喜欢的样子', '家是我的避风港', '在家慢慢醒来的早晨'],
   },
   health: {
     en: ['Strong body, calm mind', 'I move my body with love', 'Glowing from the inside', 'Healthy is my favorite look', 'I sleep deeply & wake rested', 'Energy for days', 'I nourish myself', 'Run the half marathon'],
-    zh: ['强壮的身体，平静的心', '用爱好好运动', '由内而外的光彩', '健康是最好看的样子', '睡得香，醒来元气满满', '每天都精力充沛', '好好吃饭，好好爱自己', '跑完人生第一个半马'],
   },
   love: {
     en: ['I am deeply loved', 'Soft love, safe love', 'Love finds me in 2027', 'I attract what I deserve', 'Romance in the little things', 'Loved out loud', 'My heart is open', 'Date nights & slow mornings'],
-    zh: ['我值得被深深地爱', '温柔又安心的爱', '2027，好好被爱', '吸引配得上我的人', '浪漫藏在小事里', '被坚定地选择', '心门敞开', '约会夜和慢悠悠的早晨'],
   },
   selfcare: {
     en: ['Rest is productive', 'I romanticize my life', 'Main character energy', 'Soft life era', 'I protect my peace', 'That girl, every day', 'I treat myself gently', 'Glow up season'],
-    zh: ['休息也是一种努力', '把日子过成诗', '我是自己人生的主角', '松弛感拉满', '守护好自己的情绪', '每天都是很好的我', '温柔地对待自己', '变美进行时'],
   },
   growth: {
     en: ['Read 24 books', 'Every day I get better', 'I keep my promises to myself', 'Discipline is self-love', 'Learning something new', 'Becoming her', 'Small steps, big life', 'I trust my timing'],
-    zh: ['一年读完24本书', '每天进步一点点', '对自己说到做到', '自律是最好的自爱', '学会一项新技能', '成为想成为的人', '小步快跑，大大的人生', '相信自己的节奏'],
   },
   friends: {
     en: ['My people, my joy', 'Friends who feel like family', 'More laughter, more memories', 'Celebrate every win', 'Girls trip loading', 'Surrounded by good energy', 'Cheers to us', 'Unforgettable nights'],
-    zh: ['和最好的朋友在一起', '像家人一样的朋友', '更多欢笑，更多回忆', '为每一次胜利干杯', '闺蜜旅行安排上', '身边都是好能量', '敬我们', '难忘的夜晚'],
   },
   nature: {
     en: ['Fresh air, clear mind', 'Mountains are calling', 'Grounded & grateful', 'Slow walks in nature', 'Wild and free', 'I chase sunrises', 'Peace in every view', 'Touch grass, often'],
-    zh: ['新鲜空气，清醒头脑', '山在召唤我', '踏实又感恩', '在自然里慢慢走', '自由又野生', '去追一次日出', '每一处风景都是治愈', '多出去走走'],
   },
   pets: {
     en: ['Puppy cuddles daily', 'A furry best friend', 'Unconditional love', 'Home is where my pet is', 'Tiny paws, big joy', 'Adopt, love, repeat', 'My little sunshine', 'Walks with my best friend'],
-    zh: ['每天都有小狗抱抱', '一个毛茸茸的好朋友', '无条件的爱', '有毛孩子的地方就是家', '小爪子，大快乐', '领养一只小可爱', '我的小太阳', '和毛孩子一起散步'],
   },
   car: {
     en: ['Keys to my dream car', 'Top down, music up', 'I drive my own life', 'Coastal drives at sunset', 'My first new car', 'Road trip ready', 'Freedom on four wheels', 'Paid off & mine'],
-    zh: ['拿到梦想座驾的钥匙', '敞篷、音乐、海风', '人生方向盘握在自己手里', '日落时分沿海兜风', '提人生第一辆新车', '随时出发的自驾游', '四个轮子的自由', '全款拿下'],
   },
 };
 
 export const WORDS = {
   en: ['abundance', 'peace', 'bloom', 'courage', 'glow', 'freedom', 'joy', 'focus', 'magic', 'growth', 'ease', 'confidence'],
-  zh: ['丰盛', '平静', '绽放', '勇气', '发光', '自由', '喜悦', '专注', '好运', '成长', '松弛', '自信'],
 };
 
 export const STRINGS = {
@@ -122,57 +109,5 @@ export const STRINGS = {
     aff_title: '30 daily affirmation lock screens', aff_sub: 'A fresh lock screen for every day of the month, in your aesthetic.', aff_open: 'Open my affirmation pack',
     share_text: 'Made my 2027 vision board lock screen ✨ #visionboard2027',
     remove: 'Remove',
-  },
-  zh: {
-    nav_make: '开始制作', nav_pricing: '价格', nav_faq: '常见问题', nav_guide: '教程',
-    hero_kicker: '专为手机设计的 2027 愿景板',
-    hero_title_a: '把你的 2027，', hero_title_b: '放进锁屏里。',
-    hero_sub: '选好目标，挑一个喜欢的风格，大约 60 秒就能做出一张适配手机尺寸的愿景板壁纸。不用注册，也不用去 Canva 里慢慢调。',
-    hero_cta: '免费制作我的愿景板', hero_cta2: '看看所有风格',
-    hero_note: '免费制作 · 照片不离开你的手机',
-    step1: '选择你的目标', step1_hint: '点选 2027 年想要成长的方向，每选一个会加入一张图片和一句肯定语。',
-    custom_label: '写下你自己的目标（可选）', custom_ph: '例如：跑完一个半马', add: '添加',
-    surprise: '随机来一组', shuffle: '换个排版',
-    step2: '选择风格', step2_hint: '每种风格都能免费预览，只有下载 Pro 风格时需要解锁。',
-    step3: '个性化',
-    title_label: '大标题', word_label: '年度关键词', clock_label: '给锁屏时钟留出位置',
-    photos_label: '加入你自己的照片', photos_hint: '只在本机处理，不会上传。', photos_btn: '选择照片', photos_clear: '移除我的照片',
-    size_label: '尺寸', size_iphone: 'iPhone', size_android: '安卓', size_desktop: '电脑 4K', size_print: 'A4 打印',
-    download: '下载我的壁纸', rendering: '正在生成…',
-    preview_label: '实时预览',
-    pro: 'PRO', free: '免费',
-    why_title: '为什么要放在锁屏上？',
-    why1_t: '一天到晚都能看到', why1_d: '纸质愿景板最后往往被收进抽屉，锁屏却是你每次拿起手机都会看到的地方。',
-    why2_t: '让目标保持具体', why2_d: '把目标写下来并经常看到，它就会一直留在心里。愿景板让这些话每天出现在你眼前。',
-    why3_t: '手机也变好看了', why3_d: '换上一张真心喜欢的壁纸，正好也和你的目标呼应。',
-    pricing_title: '价格很简单', pricing_sub: '制作和下载都免费，想用全部风格再升级。',
-    free_name: '免费版', free_price: '$0', free_f1: '3 种风格', free_f2: 'iPhone 和安卓尺寸', free_f3: '带小小的 glowboard 水印', free_f4: '排版随便换',
-    pro_name: 'Pro', pro_once: '一次付费 · 永久使用', pro_f1: '全部 8 种风格，以及之后上新的风格', pro_f2: '去除水印', pro_f3: '电脑 4K 和 A4 打印尺寸', pro_f4: '30 张每日肯定语锁屏', pro_f5: '所有风格都能放自己的照片',
-    unlock: '解锁 Pro', have_code: '已购买？输入解锁码', tip: '或者请我喝杯咖啡',
-    soon: '加入 Pro 等候名单',
-    faq_title: '常见问题',
-    faq: [
-      ['真的免费吗？', '是的。可以在 3 种风格里选择，免费下载 iPhone 或安卓壁纸，次数不限。Pro 是一次性解锁，包含全部风格、去水印和更大的尺寸。'],
-      ['我的照片会被上传吗？', '不会。所有处理都在浏览器里完成，照片不会离开你的设备。我们也不会要求你上传自拍或人脸。'],
-      ['iPhone 怎么设为锁屏？', '先把图片存到相册，打开后点“分享”，再选“用作墙纸”，调整好后点“添加”。建议打开“给锁屏时钟留出位置”，这样时间就不会挡住图片。'],
-      ['安卓呢？', '保存图片后，在相册里打开，点右上角菜单，选“设为壁纸”，再选“锁屏”。'],
-      ['对 Pro 不满意怎么办？', '7 天内发邮件给我们，无理由退款。'],
-      ['可以打印吗？', 'Pro 包含高清 A4 打印尺寸，可以贴在墙上、手帐里，或者带去愿景板派对。'],
-    ],
-    footer_privacy: '隐私：不需要账号，不使用追踪 Cookie，照片只保存在你的设备上。',
-    modal_ready: '你的 2027 做好啦 ✨', modal_save: '保存图片', modal_share: '分享', modal_copy: '复制链接', copied: '链接已复制！',
-    modal_ios: 'iPhone：点“保存图片”，或者长按图片选择“存储到照片”。',
-    modal_set: '怎么设置',
-    modal_set_ios: 'iPhone：照片 → 分享 → 用作墙纸',
-    modal_set_and: '安卓：相册 → ⋮ → 设为壁纸 → 锁屏',
-    modal_bestie: '也给闺蜜做一张 →',
-    pay_title: '这是 Pro 风格 ✨', pay_sub: '一次付费，解锁全部风格、去除水印、4K 和打印尺寸，另送 30 张肯定语锁屏。',
-    pay_free_alt: '或者换一个免费风格',
-    code_prompt: '请输入解锁码',
-    code_bad: '解锁码不对，请检查购买收据邮件。',
-    unlocked: 'Pro 已解锁，所有风格随便用 ✨',
-    aff_title: '30 张每日肯定语锁屏', aff_sub: '一个月每天都能换一张新锁屏，和你选的风格保持一致。', aff_open: '打开我的肯定语锁屏包',
-    share_text: '我做了一张 2027 愿景板锁屏 ✨ #2027愿景板',
-    remove: '移除',
   },
 };

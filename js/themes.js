@@ -1,7 +1,7 @@
 // Visual themes for the renderer. Colors and fonts are used by render.js
 export const THEMES = [
   {
-    id: 'clean', name: 'Clean Girl', zh: '清冷感', pro: false,
+    id: 'clean', name: 'Clean Girl', pro: false,
     bg: ['#FBF7F2', '#F3EAE0'], grain: 0.035,
     ink: '#2A2421', accent: '#C8A26B', soft: '#E9DCCB',
     titleFont: '"Instrument Serif", "Songti SC", serif', titleItalic: false,
@@ -14,7 +14,7 @@ export const THEMES = [
     shadow: 'rgba(80,55,30,0.16)',
   },
   {
-    id: 'coquette', name: 'Coquette', zh: '蝴蝶结少女', pro: false,
+    id: 'coquette', name: 'Coquette', pro: false,
     bg: ['#FCE8EA', '#F7D3D7'], grain: 0.03, pattern: 'dots',
     ink: '#8E3B4E', accent: '#E58FA3', soft: '#FFF5F6',
     titleFont: '"Pinyon Script", "Instrument Serif", cursive', titleItalic: false, titleScale: 1.05,
@@ -27,7 +27,7 @@ export const THEMES = [
     shadow: 'rgba(160,70,90,0.18)',
   },
   {
-    id: 'oldmoney', name: 'Old Money', zh: '老钱风', pro: false,
+    id: 'oldmoney', name: 'Old Money', pro: false,
     bg: ['#1F3A2E', '#16291F'], grain: 0.05,
     ink: '#F1E7D3', accent: '#C9A86A', soft: '#2B4A3B',
     titleFont: '"Instrument Serif", "Songti SC", serif', titleItalic: false, titleCaps: true, titleTracking: 0.06,
@@ -40,7 +40,7 @@ export const THEMES = [
     shadow: 'rgba(0,0,0,0.35)',
   },
   {
-    id: 'darkluxe', name: 'Dark Luxe', zh: '暗夜香槟', pro: true,
+    id: 'darkluxe', name: 'Dark Luxe', pro: true,
     bg: ['#141212', '#050505'], grain: 0.05, glow: 'rgba(212,175,110,0.22)',
     ink: '#F3E3C3', accent: '#D4AF6E', soft: '#1E1B19',
     titleFont: '"Instrument Serif", "Songti SC", serif', titleItalic: true, titleGold: true,
@@ -53,7 +53,7 @@ export const THEMES = [
     shadow: 'rgba(0,0,0,0.6)',
   },
   {
-    id: 'y2k', name: 'Y2K Chrome', zh: 'Y2K 千禧', pro: true,
+    id: 'y2k', name: 'Y2K Chrome', pro: true,
     bg: ['#C9D6FF', '#F5C6EC', '#BDF3E6'], grain: 0.03, iridescent: true,
     ink: '#3A2A6B', accent: '#7B5CFF', soft: '#FFFFFF',
     titleFont: '"Syne", "Inter", sans-serif', titleWeight: 800, titleItalic: false, titleChrome: true,
@@ -66,7 +66,7 @@ export const THEMES = [
     shadow: 'rgba(90,60,200,0.25)',
   },
   {
-    id: 'cottage', name: 'Cottagecore', zh: '田园森系', pro: true,
+    id: 'cottage', name: 'Cottagecore', pro: true,
     bg: ['#EEF0E2', '#DDE3CC'], grain: 0.06, paper: true,
     ink: '#3F4F33', accent: '#9AAE7E', soft: '#F8F6EC',
     titleFont: '"Instrument Serif", "Songti SC", serif', titleItalic: true,
@@ -79,7 +79,7 @@ export const THEMES = [
     shadow: 'rgba(60,70,40,0.2)',
   },
   {
-    id: 'polaroid', name: 'Polaroid Scrapbook', zh: '拍立得手帐', pro: true,
+    id: 'polaroid', name: 'Polaroid Scrapbook', pro: true,
     bg: ['#D8BF9A', '#C9A97E'], grain: 0.09, cork: true,
     ink: '#3B2A1E', accent: '#E25D4F', soft: '#F4ECDD',
     titleFont: '"Caveat", "Kaiti SC", cursive', titleItalic: false, titleScale: 1.15, titleWeight: 700,
@@ -92,7 +92,7 @@ export const THEMES = [
     shadow: 'rgba(40,25,10,0.35)',
   },
   {
-    id: 'mono', name: 'Minimal Mono', zh: '极简黑白', pro: true,
+    id: 'mono', name: 'Minimal Mono', pro: true,
     bg: ['#F6F6F4', '#EDEDEA'], grain: 0.03, grayscale: true,
     ink: '#111111', accent: '#111111', soft: '#FFFFFF',
     titleFont: '"Inter", "PingFang SC", sans-serif', titleWeight: 800, titleItalic: false, titleTracking: -0.04,

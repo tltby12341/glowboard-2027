@@ -28,7 +28,7 @@ h1,h2,h3{font-weight:400;margin:0}
 .nav a{text-decoration:none;color:var(--ink2);transition:color .2s}
 .nav a:hover{color:var(--ink)}
 .lang{border:1px solid rgba(29,27,26,.14);background:#fff;border-radius:999px;padding:7px 14px;font-size:13px;font-weight:600}
-@media (max-width:760px){.nav{display:none}.lang{margin-left:auto}}
+@media (max-width:760px){.nav{margin-left:auto;gap:16px}.nav a:nth-child(n+3){display:none}}
 
 /* buttons */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:999px;padding:14px 24px;font-weight:600;font-size:15px;text-decoration:none;transition:transform .18s ease,box-shadow .2s,background .2s;white-space:nowrap}
