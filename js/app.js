@@ -81,13 +81,17 @@ function applyI18n() {
 }
 
 // ---------- goals ----------
+let chipsExpanded = false;
 function renderChips() {
-  $('#goalChips').innerHTML = CATEGORIES.map((c) => `<button type="button" class="chip ${state.goals.includes(c.id) ? 'on' : ''}" data-goal="${c.id}" aria-pressed="${state.goals.includes(c.id)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${ICONS[c.icon]}</svg>${c[state.lang]}</button>`).join('');
+  const extraCount = CATEGORIES.slice(12).length;
+  $('#goalChips').classList.toggle('all', chipsExpanded);
+  $('#goalChips').innerHTML = CATEGORIES.map((c, i) => `<button type="button" class="chip ${i >= 12 ? 'extra' : ''} ${state.goals.includes(c.id) ? 'on' : ''}" data-goal="${c.id}" aria-pressed="${state.goals.includes(c.id)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${ICONS[c.icon]}</svg>${c[state.lang]}</button>`).join('') + (chipsExpanded ? '' : `<button type="button" class="chip more-chip" id="moreChips" aria-expanded="false">+ ${extraCount} more goals</button>`);
   $('#customList').innerHTML = state.custom.map((c, i) => `<span class="tag">${escapeHtml(c)}<button type="button" data-rm="${i}" aria-label="${T('remove')}">×</button></span>`).join('');
 }
 function escapeHtml(s) { return s.replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
 
 $('#goalChips').addEventListener('click', (e) => {
+  if (e.target.closest('#moreChips')) { chipsExpanded = true; renderChips(); track('more_goals'); return; }
   const b = e.target.closest('[data-goal]'); if (!b) return;
   const id = b.dataset.goal;
   if (state.goals.includes(id)) { if (state.goals.length > 1) state.goals = state.goals.filter((g) => g !== id); }
