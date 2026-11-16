@@ -6,7 +6,14 @@ Glowboard is a static site (plain HTML, CSS and JS) hosted on GitHub Pages. User
 
 ## Business model
 - **Free:** 3 aesthetics (Clean Girl, Coquette, Old Money) and iPhone/Android PNGs with a small "glowboard · make yours free" watermark. The watermark is the viral loop.
-- **Pro ($4.99, one-time):** all 12 aesthetics, no watermark, Desktop 4K and A4 print sizes, and 30 daily affirmation lock screens.
+- **Pro ($4.99, one-time):** all 12 aesthetics, no watermark, Desktop 4K and A4 print sizes, 30 daily affirmation lock screens, a matching (blurred) home screen, and a printable A4 2027 goals checklist.
+
+## Features
+- 12 looks (3 free, 9 Pro), 19 goal categories with 152 affirmations, and 8 one-tap "quick start" vibes.
+- Title styles (Serif, Script, Bold, Handwritten), tap-to-swap photos, and your own photos (kept on the device).
+- Sizes: iPhone, Android, IG/TikTok story (free); Desktop 4K, Print A4 (Pro).
+- Shareable template links: `?b=<base64url JSON>` rebuilds a board. Deep links: `?look=<themeId>` and `?goals=travel,money`.
+- SEO: `/ideas/` hub, 12 aesthetic landing pages, a 152-affirmation page, and 2 guides, each with JSON-LD and its own OG image. The sitemap lists 17 URLs.
 
 ## Turn on payments (about 15 minutes)
 1. Create a digital product called "Glowboard Pro" priced at $4.99 on **Gumroad** (easiest), **Lemon Squeezy**, or a **Stripe Payment Link**.
@@ -25,5 +32,7 @@ Glowboard is a static site (plain HTML, CSS and JS) hosted on GitHub Pages. User
 Test Pro without paying: add `?pro=preview` to the URL. Nothing is saved.
 
 ## Analytics (optional)
-Set `ANALYTICS_SNIPPET_URL` (and `ANALYTICS_DOMAIN`) in `config.js` for Plausible or Umami. The app fires events: `download_click`, `download_ok`, `paywall_view`, `unlock_click`, `unlocked`, `theme`, `share_native`, `copy_link`.
+Set `ANALYTICS_SNIPPET_URL` (and `ANALYTICS_DOMAIN`) in `config.js` for Plausible or Umami. The app fires events: `download_click`, `download_ok`, `paywall_view` (with `reason`), `paywall_style`, `unlock_click`, `unlocked`, `theme`, `vibe`, `title_font`, `photo_swap`, `more_goals`, `template_share`, `template_open`, `look_open`, `checklist_click`, `checklist_ok`, `home_click`, `home_ok`, `share_native`, `copy_link`.
+
+Not enabled yet: every privacy-friendly option (Plausible, Umami Cloud, GoatCounter, Cloudflare Web Analytics) needs an account. Once you have one, paste the script URL and domain into `config.js`. Nothing else needs to change.
 
