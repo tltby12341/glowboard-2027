@@ -1,6 +1,6 @@
 import { CATEGORIES, STRINGS, WORDS, AFFIRMATIONS } from './data.js';
 import { THEMES, themeById } from './themes.js';
-import { renderBoard, renderAffirmation, ensureFonts, SIZES, loadManifest, renderChecklist } from './render.js';
+import { renderBoard, renderAffirmation, ensureFonts, SIZES, loadManifest, renderChecklist, renderHome } from './render.js';
 
 const CFG = Object.assign({ PRO_PAYMENT_URL: '', PRO_PRICE_LABEL: '$4.99', UNLOCK_CODE_SHA256: '', TIP_URL: '', CONTACT_EMAIL: 'hello@example.com' }, window.GLOWBOARD_CONFIG || {});
 const SITE = 'https://tltby12341.github.io/glowboard-2027/';
@@ -263,6 +263,8 @@ function showResult(blob, name) {
   lastBlob = blob; if (lastUrl) URL.revokeObjectURL(lastUrl); lastUrl = URL.createObjectURL(blob);
   $('#resultImg').src = lastUrl; $('#saveLink').href = lastUrl; $('#saveLink').download = name || 'glowboard-2027.png';
   $('#resultUpsell').style.display = isPro ? 'none' : '';
+  $('#homeBtn').innerHTML = isPro ? 'Get it' : 'Get it <b class="mini-pro">PRO</b>';
+  $('#homeTeaser').hidden = !!(name && name !== 'glowboard-2027.png') || ['desktop', 'print'].includes(state.size);
   if (!isPro) renderBoard($('#upsellCv'), state, { width: 140, height: 303, watermark: false });
   const text = T('share_text');
   const link = templateLink();
@@ -357,6 +359,17 @@ async function tryUnlock(code) {
 }
 
 // ---------- affirmation pack ----------
+$('#homeBtn').addEventListener('click', async () => {
+  track('home_click', { pro: isPro });
+  if (!isPro) { closeModals(); openPay('home_screen'); return; }
+  const b = $('#homeBtn'); const old = b.innerHTML; b.disabled = true; b.textContent = 'Making…';
+  try {
+    const sz = state.size === 'android' ? SIZES.android : SIZES.iphone;
+    const cv = document.createElement('canvas'); await renderHome(cv, state, sz.w, sz.h);
+    const blob = await new Promise((res) => cv.toBlob(res, 'image/png'));
+    showResult(blob, 'glowboard-2027-home.png'); track('home_ok');
+  } finally { b.disabled = false; b.innerHTML = old; }
+});
 $('#checklistBtn').addEventListener('click', async () => {
   track('checklist_click', { pro: isPro });
   if (!isPro) { openPay('checklist'); return; }

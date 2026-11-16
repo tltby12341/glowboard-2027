@@ -294,3 +294,6 @@ details p{margin:0 0 18px;color:var(--ink2)}
 .vibe .sw{width:30px;height:42px;border-radius:8px;position:relative;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
 .vibe .sw i{position:absolute;width:8px;height:8px;border-radius:50%;right:5px;top:6px}
 .vibe .mini-pro{margin-left:-2px}
+
+.home-teaser{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;font-size:14px;margin:4px 0 8px;color:var(--ink2)}
+.home-teaser[hidden]{display:none}

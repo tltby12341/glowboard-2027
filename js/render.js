@@ -727,3 +727,34 @@ export async function renderChecklist(canvas, state, W = 2480, H = 3508) {
   mm.forEach((m, i) => { const cx = M + step * (i + 0.5), cy = my + 6.5 * u; ctx.beginPath(); ctx.arc(cx, cy, 2.6 * u, 0, Math.PI * 2); ctx.lineWidth = 0.22 * u; ctx.strokeStyle = 'rgba(42,36,33,0.4)'; ctx.stroke(); ctx.fillStyle = soft; ctx.font = fontStr(1.9 * u, '"Inter", sans-serif', { weight: 600 }); ctx.fillText(m, cx, cy + 0.7 * u); });
   ctx.fillStyle = soft; ctx.font = fontStr(1.5 * u, '"Inter", sans-serif', { weight: 500 }); ctx.fillText('made with glowboard · 2027', W / 2, H - M + 1 * u);
 }
+
+// ---------- matching home screen (Pro) ----------
+export async function renderHome(canvas, state, W = 1179, H = 2556) {
+  let t = themeById(state.themeId);
+  if (state.font && TITLE_FONTS[state.font]) t = { ...t, ...TITLE_FONTS[state.font] };
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d'); const u = W / 100;
+  // tiny render, then upscale in 2 steps = smooth blur that works in every browser (no ctx.filter)
+  const src = document.createElement('canvas');
+  await renderBoard(src, { ...state, clockSafe: false }, { width: 200, height: Math.round(200 * H / W), watermark: false });
+  const step = (from, w) => { const c = document.createElement('canvas'); c.width = w; c.height = Math.max(1, Math.round(w * H / W)); const x = c.getContext('2d'); x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high'; x.drawImage(from, 0, 0, c.width, c.height); return c; };
+  let c = step(step(step(src, 60), 18), 9);
+  c = step(step(c, 40), 160);
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high'; ctx.drawImage(c, -W * 0.1, -H * 0.1, W * 1.2, H * 1.2);
+  // wash with the theme background so app icons stay readable
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  const bg0 = t.bg[0], bg1 = t.bg[t.bg.length - 1];
+  ctx.globalAlpha = 0.3; g.addColorStop(0, bg0); g.addColorStop(1, bg1); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1;
+  drawGrain(ctx, { grain: (t.grain || 0.03) + 0.02 }, W, H);
+  // word of the year, low on the screen above the dock
+  const word = (state.word || defaultWord('en', state.seed || 1)).trim();
+  const dark = /^#([0-9a-f]{6})$/i.test(bg0) && (() => { const n = parseInt(bg0.slice(1), 16); return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255 < 0.45; })();
+  ctx.textAlign = 'center'; ctx.fillStyle = dark ? 'rgba(255,255,255,0.92)' : 'rgba(30,24,20,0.82)';
+  ctx.shadowColor = dark ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.5)'; ctx.shadowBlur = u * 2;
+  const fs = 12 * u * (t.titleScale || 1);
+  ctx.font = fontStr(fs, t.titleFont, { italic: t.titleItalic, weight: t.titleWeight || 400 });
+  ctx.fillText((state.title || '2027').trim() || '2027', W / 2, H * 0.78);
+  ctx.font = fontStr(4.6 * u, '"Instrument Serif", serif', { italic: true });
+  ctx.fillText(word, W / 2, H * 0.78 + 7.5 * u);
+  ctx.shadowBlur = 0;
+}
