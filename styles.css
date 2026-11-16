@@ -274,3 +274,5 @@ details p{margin:0 0 18px;color:var(--ink2)}
 .pro-strip figure{flex:none;cursor:pointer;border-radius:12px;transition:transform .2s}
 .pro-strip figure:hover{transform:translateY(-2px)}
 .pro-strip figure.on canvas{outline:2px solid var(--gold,#C8A26B);outline-offset:2px}
+
+.tpl-btn{display:flex;width:fit-content;align-items:center;gap:6px;margin:10px auto 0;font-size:14px;color:var(--ink2)}

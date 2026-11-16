@@ -9,6 +9,24 @@ const $$ = (s, el = document) => Array.from(el.querySelectorAll(s));
 const params = new URLSearchParams(location.search);
 const previewPro = params.get('pro') === 'preview';
 
+// ---------- shareable template links ----------
+function b64u(s) { return btoa(String.fromCharCode(...new TextEncoder().encode(s))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+function unb64u(s) { const b = atob(s.replace(/-/g, '+').replace(/_/g, '/')); return new TextDecoder().decode(Uint8Array.from(b, (c) => c.charCodeAt(0))); }
+function encodeBoard() { return b64u(JSON.stringify({ g: state.goals, t: state.themeId, ti: state.title, w: state.word, c: state.custom, s: state.seed })); }
+function decodeBoard(s) {
+  try {
+    const o = JSON.parse(unb64u(s)); const cats = new Set(CATEGORIES.map((c) => c.id)); const out = {};
+    if (Array.isArray(o.g)) { const g = o.g.filter((x) => cats.has(x)).slice(0, 7); if (g.length) out.goals = g; }
+    if (THEMES.some((t) => t.id === o.t)) out.themeId = o.t;
+    if (typeof o.ti === 'string') out.title = o.ti.slice(0, 24);
+    if (typeof o.w === 'string') out.word = o.w.slice(0, 24);
+    if (Array.isArray(o.c)) out.custom = o.c.filter((x) => typeof x === 'string').map((x) => x.slice(0, 60)).slice(0, 6);
+    if (Number.isFinite(o.s)) out.seed = Math.abs(Math.floor(o.s)) % 1e7 || 1;
+    return out;
+  } catch (e) { return null; }
+}
+function templateLink() { return SITE + '?b=' + encodeBoard() + '#make'; }
+
 const ICONS = {
   plane: '<path d="M2 16l20-8-6 12-3-5-5 3 1-5z"/>', coin: '<circle cx="12" cy="12" r="8"/><path d="M12 8v8M9.5 10.5c0-1 1-1.5 2.5-1.5s2.5.6 2.5 1.6c0 2.4-5 1.2-5 3.6 0 1 1 1.6 2.5 1.6s2.5-.5 2.5-1.5"/>',
   bag: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>', home: '<path d="M3 11l9-7 9 7v9H3z"/><path d="M10 20v-6h4v6"/>',
@@ -147,7 +165,7 @@ async function renderPreview() {
   const t = themeById(state.themeId);
   dev.classList.toggle('is-pro', t.pro && !isPro);
   updateDlLabel();
-  dev.classList.toggle('light', !['oldmoney', 'darkluxe'].includes(t.id));
+  dev.classList.toggle('light', !['oldmoney', 'darkluxe', 'mobwife', 'cozywinter'].includes(t.id));
   await renderBoard(cv, state, { width: w, height: h, kind: sz.kind, watermark: !isPro });
   const ft = $('#fabThumb canvas');
   if (ft) { ft.width = 96; ft.height = Math.round(96 * h / w); ft.getContext('2d').drawImage(cv, 0, 0, ft.width, ft.height); }
@@ -196,9 +214,10 @@ function showResult(blob) {
   $('#resultUpsell').style.display = isPro ? 'none' : '';
   if (!isPro) renderBoard($('#upsellCv'), state, { width: 140, height: 303, watermark: false });
   const text = T('share_text');
-  $('#pinLink').href = `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(SITE)}&media=${encodeURIComponent(SITE + 'og-image.png')}&description=${encodeURIComponent(text)}`;
-  $('#xLink').href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(SITE)}`;
-  $('#waLink').href = `https://wa.me/?text=${encodeURIComponent(text + ' ' + SITE)}`;
+  const link = templateLink();
+  $('#pinLink').href = `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(link)}&media=${encodeURIComponent(SITE + 'og-image.png')}&description=${encodeURIComponent(text)}`;
+  $('#xLink').href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(link)}`;
+  $('#waLink').href = `https://wa.me/?text=${encodeURIComponent(text + ' ' + link)}`;
   $('#shareBtn').style.display = navigator.share ? '' : 'none';
   openModal('resultModal');
 }
@@ -217,12 +236,23 @@ $('#saveLink').addEventListener('click', () => track('save_image'));
 $('#shareBtn').addEventListener('click', async () => {
   try {
     const file = new File([lastBlob], 'glowboard-2027.png', { type: 'image/png' });
-    if (navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ files: [file], text: T('share_text') + ' ' + SITE });
-    else await navigator.share({ text: T('share_text'), url: SITE });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ files: [file], text: T('share_text') + ' ' + templateLink() });
+    else await navigator.share({ text: T('share_text'), url: templateLink() });
     track('share_native');
   } catch (e) {}
 });
-$('#copyBtn').addEventListener('click', async () => { try { await navigator.clipboard.writeText(SITE); toast(T('copied')); track('copy_link'); } catch (e) {} });
+async function copyText(s) {
+  try { await navigator.clipboard.writeText(s); return true; } catch (e) {
+    const ta = document.createElement('textarea'); ta.value = s; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select();
+    let ok = false; try { ok = document.execCommand('copy'); } catch (_) {} ta.remove(); return ok;
+  }
+}
+$('#copyBtn').addEventListener('click', async () => { if (await copyText(templateLink())) toast('Template link copied. Anyone who opens it gets your board ✨'); track('copy_link'); });
+$('#tplBtn').addEventListener('click', async () => {
+  const url = templateLink(); track('template_share');
+  if (navigator.share && matchMedia('(pointer:coarse)').matches) { try { await navigator.share({ title: 'My 2027 vision board', text: 'Make one like mine (free) ✨', url }); return; } catch (e) { if (e.name === 'AbortError') return; } }
+  if (await copyText(url)) toast('Link copied. Your friend will open this exact board ✨');
+});
 
 // ---------- pro / pay ----------
 function openPay(reason) {
@@ -327,6 +357,11 @@ if (CFG.TIP_URL) $$('.tip-link').forEach((a) => { a.href = CFG.TIP_URL; a.hidden
 if (CFG.ANALYTICS_SNIPPET_URL) { const s = document.createElement('script'); s.defer = true; s.src = CFG.ANALYTICS_SNIPPET_URL; if (CFG.ANALYTICS_DOMAIN) s.dataset.domain = CFG.ANALYTICS_DOMAIN; document.head.appendChild(s); }
 
 (async function init() {
+  let sharedLoaded = false;
+  if (params.get('b')) { const sh = decodeBoard(params.get('b')); if (sh) { Object.assign(state, sh); sharedLoaded = true; } }
+  const look = params.get('look'); if (look && THEMES.some((t) => t.id === look)) state.themeId = look;
+  const pg = params.get('goals'); if (pg) { const cats = new Set(CATEGORIES.map((c) => c.id)); const g = pg.split(',').filter((x) => cats.has(x)).slice(0, 7); if (g.length) state.goals = g; }
+  $('#titleInput').value = state.title;
   $('#wordInput').value = state.word;
   applyI18n(); buildThemeGrid();
   const code = params.get('unlock');
@@ -336,5 +371,6 @@ if (CFG.ANALYTICS_SNIPPET_URL) { const s = document.createElement('script'); s.d
   }
   await loadManifest(); await ensureFonts();
   await renderPreview(); renderHero(); renderThumbs();
+  if (sharedLoaded || look) { track(sharedLoaded ? 'template_open' : 'look_open', { theme: state.themeId }); if (sharedLoaded) toast('Board loaded. Tweak it and make it yours ✨'); }
   let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { renderPreview(); renderHero(); }, 200); });
 })();
