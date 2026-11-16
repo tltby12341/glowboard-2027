@@ -276,8 +276,19 @@ function showResult(blob, name) {
   $('#xLink').href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(link)}`;
   $('#waLink').href = `https://wa.me/?text=${encodeURIComponent(text + ' ' + link)}`;
   $('#shareBtn').style.display = navigator.share ? '' : 'none';
+  // iPhone-safe saving: the share sheet's "Save Image" puts it straight into Photos
+  lastFile = new File([blob], name || 'glowboard-2027.png', { type: 'image/png' });
+  useShareSave = IS_IOS && !!(navigator.canShare && navigator.canShare({ files: [lastFile] }));
+  $('#saveLink').textContent = IS_IOS ? 'Save to Photos' : T('modal_save');
+  $('#saveHint').innerHTML = IN_APP ? 'In the TikTok/Instagram browser, <b>press and hold the picture</b> and choose “Save to Photos”. For the smoothest save, tap ⋯ and choose <b>Open in Safari</b>.'
+    : IS_IOS ? (useShareSave ? 'Tap <b>Save to Photos</b>, then choose <b>“Save Image”</b>. Or press and hold the picture.' : 'Press and hold the picture, then choose <b>“Save to Photos”</b>.')
+    : 'Your PNG downloads at full resolution. On Android, find it in Files or Gallery → Downloads.';
   openModal('resultModal');
 }
+const UA = navigator.userAgent || '';
+const IS_IOS = /iP(hone|ad|od)/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const IN_APP = /Instagram|FBAN|FBAV|TikTok|musical_ly|Bytedance|Line\/|Snapchat|Pinterest\//i.test(UA);
+let lastFile = null, useShareSave = false;
 $('#downloadBtn').addEventListener('click', download);
 $('#upsellBtn').addEventListener('click', () => { closeModals(); openPay('result_upsell'); });
 function updateDlLabel() {
@@ -289,7 +300,16 @@ function updateDlLabel() {
 }
 $('#fabDownload').addEventListener('click', download);
 $('#fabThumb').addEventListener('click', () => $('#device').scrollIntoView({ behavior: 'smooth', block: 'center' }));
-$('#saveLink').addEventListener('click', () => track('save_image'));
+$('#saveLink').addEventListener('click', async (e) => {
+  if (useShareSave && lastFile) {
+    e.preventDefault();
+    try { await navigator.share({ files: [lastFile] }); track('save_image', { via: 'share' }); return; }
+    catch (err) { if (err && err.name === 'AbortError') return; }
+    // share failed: show the image alone so it can be long-pressed
+    window.open(lastUrl, '_blank');
+  }
+  track('save_image', { via: useShareSave ? 'fallback' : 'download' });
+});
 $('#shareBtn').addEventListener('click', async () => {
   try {
     const file = new File([lastBlob], 'glowboard-2027.png', { type: 'image/png' });

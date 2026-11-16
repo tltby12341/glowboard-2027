@@ -310,3 +310,4 @@ details p{margin:0 0 18px;color:var(--ink2)}
 
 .device.story{aspect-ratio:1080/1920;border-radius:26px}
 .device.story .lock{display:none}
+.result-wrap img{-webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto}
