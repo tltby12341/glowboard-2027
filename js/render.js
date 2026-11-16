@@ -659,3 +659,69 @@ export const SIZES = {
 };
 
 export function defaultWord(lang, seed) { const arr = WORDS[lang] || WORDS.en; return arr[seed % arr.length]; }
+
+// ---------- printable 2027 goals checklist (Pro) ----------
+export async function renderChecklist(canvas, state, W = 2480, H = 3508) {
+  const manifest = await loadManifest();
+  let t = themeById(state.themeId);
+  if (state.font && TITLE_FONTS[state.font]) t = { ...t, ...TITLE_FONTS[state.font] };
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d'); const u = W / 100; const M = 7 * u;
+  const ink = '#2A2421', soft = '#8A7F77';
+  const lum = (hex) => { const m = /^#([0-9a-f]{6})$/i.exec(hex || ''); if (!m) return 0.5; const n = parseInt(m[1], 16); return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255; };
+  const accent = lum(t.accent) > 0.82 ? '#C8A26B' : t.accent;
+  ctx.fillStyle = '#FFFDF9'; ctx.fillRect(0, 0, W, H);
+  // photo strip
+  const { photos } = buildItems(state, manifest, 'en'); swapPhotos(photos, state.swaps, manifest);
+  const strip = photos.slice(0, 4);
+  await Promise.all(strip.map(async (p) => { if (!p.img && p.src) p.img = await loadImage(p.src); }));
+  const sy = M, sh = 24 * u, gap = 1.6 * u, sw = (W - 2 * M - gap * 3) / 4;
+  strip.forEach((p, i) => { const x = M + i * (sw + gap); ctx.save(); rr(ctx, x, sy, sw, sh, 2 * u); ctx.clip(); if (p.img) drawCover(ctx, p.img, x, sy, sw, sh); else { ctx.fillStyle = '#EFE7DC'; ctx.fillRect(x, sy, sw, sh); } ctx.restore(); });
+  // title
+  let y = sy + sh + 13 * u;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.fillStyle = ink;
+  const title = (state.title || '2027').trim() || '2027';
+  let ts = 13 * u * (t.titleScale || 1);
+  ctx.font = fontStr(ts, t.titleFont, { italic: t.titleItalic, weight: t.titleWeight || 400 });
+  while (ctx.measureText(title).width > W - 2 * M && ts > 4 * u) { ts *= 0.92; ctx.font = fontStr(ts, t.titleFont, { italic: t.titleItalic, weight: t.titleWeight || 400 }); }
+  ctx.fillText(title, W / 2, y);
+  y += Math.max(4.6 * u, ts * (/Pinyon|Caveat/.test(t.titleFont) ? 0.58 : 0.3)); ctx.fillStyle = accent; ctx.font = fontStr(1.9 * u, '"Inter", sans-serif', { weight: 700 });
+  drawTracked(ctx, 'GOALS  ·  INTENTIONS  ·  CHECK-INS', W / 2, y, 0.25, 1.9 * u);
+  const word = state.word || defaultWord('en', state.seed || 1);
+  if (word) { y += 5.4 * u; ctx.fillStyle = ink; ctx.font = fontStr(3.6 * u, '"Instrument Serif", serif', { italic: true }); ctx.fillText('word of the year: ' + word, W / 2, y); }
+  // goal boxes
+  y += 5 * u;
+  const goals = (state.goals.length ? state.goals : ['travel', 'money', 'selfcare', 'home']).slice(0, 6);
+  const custom = (state.custom || []).filter((c) => c.trim());
+  const cols = 2, bw = (W - 2 * M - 3 * u) / cols, rows = Math.ceil(goals.length / cols);
+  const monthsH = 17 * u, footer = 6 * u;
+  const bh = Math.min(34 * u, (H - y - monthsH - footer - M - (rows - 1) * 3 * u) / rows);
+  let ci = 0;
+  goals.forEach((g, i) => {
+    const bx = M + (i % cols) * (bw + 3 * u), by = y + Math.floor(i / cols) * (bh + 3 * u);
+    ctx.save(); rr(ctx, bx, by, bw, bh, 2.4 * u); ctx.fillStyle = '#FFFFFF'; ctx.fill(); ctx.lineWidth = 0.22 * u; ctx.strokeStyle = 'rgba(42,36,33,0.14)'; ctx.stroke(); ctx.restore();
+    const cat = CATEGORIES.find((c) => c.id === g); const name = (cat ? cat.en : g).toUpperCase();
+    ctx.textAlign = 'left'; ctx.fillStyle = accent; ctx.font = fontStr(1.9 * u, '"Inter", sans-serif', { weight: 700 });
+    drawTracked(ctx, name, bx + 3 * u, by + 5 * u, 0.2, 1.9 * u);
+    const lines = 4, lh = (bh - 9 * u) / lines;
+    const affs = AFFIRMATIONS[g]?.en || [];
+    for (let k = 0; k < lines; k++) {
+      const ly = by + 8.5 * u + k * lh + lh * 0.55;
+      ctx.lineWidth = 0.22 * u; ctx.strokeStyle = 'rgba(42,36,33,0.55)'; rr(ctx, bx + 3 * u, ly - 1.7 * u, 2.2 * u, 2.2 * u, 0.45 * u); ctx.stroke();
+      let text = '';
+      if (k === 0) text = custom[ci] ? custom[ci++] : (affs[(state.seed || 1) % Math.max(1, affs.length)] || '');
+      if (text) {
+        ctx.fillStyle = ink; let fs = 2.5 * u; ctx.font = fontStr(fs, '"Instrument Serif", serif');
+        while (ctx.measureText(text).width > bw - 9 * u && fs > 1.4 * u) { fs *= 0.93; ctx.font = fontStr(fs, '"Instrument Serif", serif'); }
+        ctx.fillText(text, bx + 6.6 * u, ly);
+      } else { ctx.strokeStyle = 'rgba(42,36,33,0.16)'; ctx.beginPath(); ctx.moveTo(bx + 6.6 * u, ly + 0.4 * u); ctx.lineTo(bx + bw - 3 * u, ly + 0.4 * u); ctx.stroke(); }
+    }
+  });
+  // monthly check-in
+  const my = H - M - footer - monthsH + 4 * u;
+  ctx.textAlign = 'center'; ctx.fillStyle = accent; ctx.font = fontStr(1.9 * u, '"Inter", sans-serif', { weight: 700 });
+  drawTracked(ctx, 'MONTHLY CHECK-IN', W / 2, my, 0.25, 1.9 * u);
+  const mm = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'], step = (W - 2 * M) / 12;
+  mm.forEach((m, i) => { const cx = M + step * (i + 0.5), cy = my + 6.5 * u; ctx.beginPath(); ctx.arc(cx, cy, 2.6 * u, 0, Math.PI * 2); ctx.lineWidth = 0.22 * u; ctx.strokeStyle = 'rgba(42,36,33,0.4)'; ctx.stroke(); ctx.fillStyle = soft; ctx.font = fontStr(1.9 * u, '"Inter", sans-serif', { weight: 600 }); ctx.fillText(m, cx, cy + 0.7 * u); });
+  ctx.fillStyle = soft; ctx.font = fontStr(1.5 * u, '"Inter", sans-serif', { weight: 500 }); ctx.fillText('made with glowboard · 2027', W / 2, H - M + 1 * u);
+}

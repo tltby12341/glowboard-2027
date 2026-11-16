@@ -1,6 +1,6 @@
 import { CATEGORIES, STRINGS, WORDS, AFFIRMATIONS } from './data.js';
 import { THEMES, themeById } from './themes.js';
-import { renderBoard, renderAffirmation, ensureFonts, SIZES, loadManifest } from './render.js';
+import { renderBoard, renderAffirmation, ensureFonts, SIZES, loadManifest, renderChecklist } from './render.js';
 
 const CFG = Object.assign({ PRO_PAYMENT_URL: '', PRO_PRICE_LABEL: '$4.99', UNLOCK_CODE_SHA256: '', TIP_URL: '', CONTACT_EMAIL: 'hello@example.com' }, window.GLOWBOARD_CONFIG || {});
 const SITE = 'https://tltby12341.github.io/glowboard-2027/';
@@ -109,6 +109,29 @@ $('#surpriseBtn').addEventListener('click', () => {
   $('#wordInput').value = state.word;
   state.seed = Math.floor(Math.random() * 1e6) + 1; state.swaps = {};
   renderChips(); markTheme(); schedule(true); track('surprise');
+});
+
+// ---------- quick-start vibes ----------
+const VIBES = [
+  { id: 'thatgirl', name: 'That girl', theme: 'clean', goals: ['selfcare', 'health', 'career', 'home'], word: 'discipline' },
+  { id: 'softlife', name: 'Soft life', theme: 'coquette', goals: ['love', 'selfcare', 'travel', 'friends', 'style'], word: 'softness' },
+  { id: 'oldmoney', name: 'Old money', theme: 'oldmoney', goals: ['travel', 'money', 'home', 'style'], word: 'elegance' },
+  { id: 'moneyera', name: 'Money era', theme: 'darkluxe', goals: ['money', 'career', 'car', 'business', 'travel'], word: 'abundance' },
+  { id: 'mobwife', name: 'Mob wife', theme: 'mobwife', goals: ['glam', 'money', 'love', 'style'], word: 'unapologetic' },
+  { id: 'cozy', name: 'Cozy reset', theme: 'cozywinter', goals: ['cozy', 'home', 'peace', 'growth'], word: 'peace' },
+  { id: 'student', name: 'Student glow-up', theme: 'mono', goals: ['study', 'growth', 'health', 'career'], word: 'focus' },
+  { id: 'travel', name: 'Travel girl', theme: 'coastal', goals: ['travel', 'nature', 'friends', 'health'], word: 'adventure' },
+];
+function renderVibes() {
+  $('#vibes').innerHTML = VIBES.map((v) => { const t = themeById(v.theme); const bg = `linear-gradient(135deg, ${t.bg.join(', ')})`;
+    return `<button type="button" class="vibe" role="listitem" data-vibe="${v.id}"><span class="sw" style="background:${bg}"><i style="background:${t.accent}"></i></span><span class="vn">${v.name}</span>${t.pro && !isPro ? '<b class="mini-pro">PRO</b>' : ''}</button>`; }).join('');
+}
+$('#vibes').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-vibe]'); if (!b) return; const v = VIBES.find((x) => x.id === b.dataset.vibe);
+  Object.assign(state, { themeId: v.theme, goals: v.goals.slice(), word: v.word, swaps: {}, seed: Math.floor(Math.random() * 1e6) + 1 });
+  $('#wordInput').value = state.word; $$('.vibe').forEach((x) => x.classList.toggle('on', x === b));
+  renderChips(); markTheme(); schedule(true); track('vibe', { vibe: v.id });
+  if (matchMedia('(max-width: 900px)').matches) $('#device').scrollIntoView({ behavior: 'smooth', block: 'center' });
 });
 
 // ---------- themes ----------
@@ -228,9 +251,9 @@ async function download() {
   }
 }
 let lastBlob = null, lastUrl = null;
-function showResult(blob) {
+function showResult(blob, name) {
   lastBlob = blob; if (lastUrl) URL.revokeObjectURL(lastUrl); lastUrl = URL.createObjectURL(blob);
-  $('#resultImg').src = lastUrl; $('#saveLink').href = lastUrl;
+  $('#resultImg').src = lastUrl; $('#saveLink').href = lastUrl; $('#saveLink').download = name || 'glowboard-2027.png';
   $('#resultUpsell').style.display = isPro ? 'none' : '';
   if (!isPro) renderBoard($('#upsellCv'), state, { width: 140, height: 303, watermark: false });
   const text = T('share_text');
@@ -321,11 +344,21 @@ async function tryUnlock(code) {
   if (!code || !CFG.UNLOCK_CODE_SHA256 || !crypto.subtle) return false;
   const h = await sha256(code);
   if (h.toLowerCase() !== CFG.UNLOCK_CODE_SHA256.toLowerCase()) return false;
-  localStorage.setItem('gb_pro', '1'); isPro = true; confetti(); toast(T('unlocked')); schedule(true); track('unlocked');
+  localStorage.setItem('gb_pro', '1'); isPro = true; renderVibes(); confetti(); toast(T('unlocked')); schedule(true); track('unlocked');
   return true;
 }
 
 // ---------- affirmation pack ----------
+$('#checklistBtn').addEventListener('click', async () => {
+  track('checklist_click', { pro: isPro });
+  if (!isPro) { openPay('checklist'); return; }
+  const b = $('#checklistBtn'); const old = b.textContent; b.disabled = true; b.textContent = 'Making your checklist…';
+  try {
+    const cv = document.createElement('canvas'); await renderChecklist(cv, state);
+    const blob = await new Promise((res) => cv.toBlob(res, 'image/png'));
+    showResult(blob, 'glowboard-2027-checklist.png'); track('checklist_ok');
+  } finally { b.disabled = false; b.textContent = old; }
+});
 $('#affBtn').addEventListener('click', () => {
   const grid = $('#affGrid'); grid.innerHTML = '';
   const pool = [];
@@ -383,7 +416,7 @@ if (CFG.ANALYTICS_SNIPPET_URL) { const s = document.createElement('script'); s.d
   const pg = params.get('goals'); if (pg) { const cats = new Set(CATEGORIES.map((c) => c.id)); const g = pg.split(',').filter((x) => cats.has(x)).slice(0, 7); if (g.length) state.goals = g; }
   $('#titleInput').value = state.title; markFont();
   $('#wordInput').value = state.word;
-  applyI18n(); buildThemeGrid();
+  applyI18n(); buildThemeGrid(); renderVibes();
   const code = params.get('unlock');
   if (code) {
     await tryUnlock(code);
