@@ -379,7 +379,8 @@ export async function renderBoard(canvas, state, opts = {}) {
     collage = { x: W * 0.35, y: H * 0.07, w: W * 0.6, h: H * 0.86 };
   } else {
     const isStory = opts.kind === 'story';
-    const top = state.clockSafe && !isPrint && !isStory ? H * 0.285 : H * (isStory ? 0.075 : 0.055);
+    const isIpad = opts.kind === 'ipad';
+    const top = state.clockSafe && !isPrint && !isStory ? H * (isIpad ? 0.22 : 0.285) : H * (isStory ? 0.075 : 0.055);
     const th = H * (isPrint ? 0.14 : 0.13);
     titleBox = { x: W * 0.06, y: top, w: W * 0.88, h: th };
     const bottom = isPrint ? H * 0.95 : H * 0.915;
@@ -669,6 +670,7 @@ export const SIZES = {
   desktop: { w: 3840, h: 2160, pro: true },
   print: { w: 2480, h: 3508, pro: true, kind: 'print' },
   story: { w: 1080, h: 1920, pro: false, kind: 'story' },
+  ipad: { w: 2048, h: 2732, pro: true, kind: 'ipad' },
 };
 
 export function defaultWord(lang, seed) { const arr = WORDS[lang] || WORDS.en; return arr[seed % arr.length]; }

@@ -1,5 +1,6 @@
 import { CATEGORIES, STRINGS, WORDS, AFFIRMATIONS } from './data.js';
 import { THEMES, themeById } from './themes.js';
+import { makeZip } from './zip.js';
 import { renderBoard, renderAffirmation, ensureFonts, SIZES, loadManifest, renderChecklist, renderHome } from './render.js';
 
 const CFG = Object.assign({ PRO_PAYMENT_URL: '', PRO_PRICE_LABEL: '$4.99', UNLOCK_CODE_SHA256: '', TIP_URL: '', CONTACT_EMAIL: 'hello@example.com' }, window.GLOWBOARD_CONFIG || {});
@@ -188,7 +189,7 @@ $('#sizeSeg').addEventListener('click', (e) => {
   const b = e.target.closest('[data-size]'); if (!b) return;
   state.size = b.dataset.size; $$('#sizeSeg button').forEach((x) => x.classList.toggle('on', x === b));
   const dev = $('#device');
-  dev.classList.toggle('landscape', state.size === 'desktop'); dev.classList.toggle('paper', state.size === 'print'); dev.classList.toggle('story', state.size === 'story');
+  dev.classList.toggle('landscape', state.size === 'desktop'); dev.classList.toggle('paper', state.size === 'print'); dev.classList.toggle('story', state.size === 'story'); dev.classList.toggle('ipad', state.size === 'ipad');
   schedule(false);
 });
 $('#shuffleBtn').addEventListener('click', () => { state.seed = Math.floor(Math.random() * 1e6) + 1; state.swaps = {}; schedule(true); track('shuffle'); });
@@ -271,7 +272,9 @@ function showResult(blob, name) {
   $('#resultImg').src = lastUrl; $('#saveLink').href = lastUrl; $('#saveLink').download = name || 'glowboard-2027.png';
   $('#resultUpsell').style.display = isPro ? 'none' : '';
   $('#homeBtn').innerHTML = isPro ? 'Get it' : 'Get it <b class="mini-pro">PRO</b>';
-  $('#homeTeaser').hidden = !!(name && name !== 'glowboard-2027.png') || ['desktop', 'print', 'story'].includes(state.size);
+  $('#homeTeaser').hidden = !!(name && name !== 'glowboard-2027.png') || ['desktop', 'print', 'story', 'ipad'].includes(state.size);
+  $('#setBtn').innerHTML = isPro ? 'Download the set (.zip)' : 'Get the set <b class="mini-pro">PRO</b>';
+  $('#setTeaser').hidden = !!(name && /set|checklist|home/.test(name));
   if (!isPro) renderBoard($('#upsellCv'), state, { width: 140, height: 303, watermark: false });
   const text = T('share_text');
   const link = templateLink();
@@ -386,6 +389,29 @@ async function tryUnlock(code) {
 }
 
 // ---------- affirmation pack ----------
+async function canvasBlob(fn, type = 'image/png', q) { const cv = document.createElement('canvas'); await fn(cv); const b = await new Promise((res) => cv.toBlob(res, type, q)); cv.width = cv.height = 0; return b; }
+$('#setBtn').addEventListener('click', async () => {
+  track('set_click', { pro: isPro });
+  if (!isPro) { closeModals(); openPay('full_set'); return; }
+  const b = $('#setBtn'); const old = b.innerHTML; b.disabled = true;
+  try {
+    const phone = state.size === 'android' ? SIZES.android : SIZES.iphone;
+    const jobs = [
+      ['1-lock-screen.png', (cv) => renderBoard(cv, state, { width: phone.w, height: phone.h, kind: phone.kind, watermark: false })],
+      ['2-home-screen.png', (cv) => renderHome(cv, state, phone.w, phone.h)],
+      ['3-ipad.png', (cv) => renderBoard(cv, state, { width: SIZES.ipad.w, height: SIZES.ipad.h, kind: 'ipad', watermark: false })],
+      ['4-desktop-4k.png', (cv) => renderBoard(cv, state, { width: SIZES.desktop.w, height: SIZES.desktop.h, kind: SIZES.desktop.kind, watermark: false })],
+      ['5-ig-story.png', (cv) => renderBoard(cv, state, { width: SIZES.story.w, height: SIZES.story.h, kind: 'story', watermark: false })],
+      ['6-goals-checklist-a4.png', (cv) => renderChecklist(cv, state)],
+    ];
+    const files = [];
+    for (let i = 0; i < jobs.length; i++) { b.textContent = `Making ${i + 1}/${jobs.length}…`; files.push({ name: 'glowboard-2027/' + jobs[i][0].replace('.png', '.jpg'), blob: await canvasBlob(jobs[i][1], 'image/jpeg', 0.93) }); }
+    const zip = await makeZip(files);
+    const a = document.createElement('a'); a.href = URL.createObjectURL(zip); a.download = 'glowboard-2027-set.zip'; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+    toast('Your 2027 set is downloading ✨'); track('set_ok');
+  } finally { b.disabled = false; b.innerHTML = old; }
+});
 $('#homeBtn').addEventListener('click', async () => {
   track('home_click', { pro: isPro });
   if (!isPro) { closeModals(); openPay('home_screen'); return; }
