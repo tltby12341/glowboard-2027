@@ -538,7 +538,7 @@ function drawTitle(ctx, t, state, box, u, lang, landscape) {
     g.addColorStop(0, '#F7E7C1'); g.addColorStop(0.5, '#D4AF6E'); g.addColorStop(1, '#9C7A3C'); ctx.fillStyle = g;
   } else if (t.titleChrome) {
     const g = ctx.createLinearGradient(0, baseY - size, 0, baseY);
-    g.addColorStop(0, '#FFFFFF'); g.addColorStop(0.45, '#B9B4E8'); g.addColorStop(0.55, '#8C7BE0'); g.addColorStop(1, '#E7D9FF');
+    g.addColorStop(0, '#FFFFFF'); g.addColorStop(0.38, '#CFC8FF'); g.addColorStop(0.52, '#6A55E0'); g.addColorStop(0.8, '#3A2690'); g.addColorStop(1, '#8F7CF0');
     ctx.fillStyle = g;
     ctx.save(); ctx.shadowColor = 'rgba(80,50,200,0.35)'; ctx.shadowBlur = u * 2; ctx.shadowOffsetY = u * 0.6;
     drawTracked(ctx, txt, cx, baseY, tracking, size); ctx.restore();
