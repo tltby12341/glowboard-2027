@@ -72,5 +72,17 @@
  "cozy": [
   "cozy-fireplace.webp",
   "cozy-cabin.webp"
+ ],
+ "academia": [
+  "academia-desk.webp",
+  "academia-library.webp"
+ ],
+ "aspen": [
+  "aspen-chalet.webp",
+  "cozy-cabin.webp"
+ ],
+ "pinky2k": [
+  "pinky2k-flatlay.webp",
+  "glam-vanity.webp"
  ]
 }

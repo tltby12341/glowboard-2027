@@ -110,7 +110,7 @@ export const STRINGS = {
     why3_t: 'It makes your phone pretty', why3_d: 'Your phone gets a wallpaper you actually love, and it lines up with your goals.',
     pricing_title: 'Simple pricing', pricing_sub: 'Make and download your board free. Upgrade if you want every look.',
     free_name: 'Free', free_price: '$0', free_f1: '3 aesthetics', free_f2: 'iPhone & Android sizes', free_f3: 'Small "glowboard" mark', free_f4: 'Unlimited shuffles',
-    pro_name: 'Pro', pro_once: 'one-time · yours forever', pro_f1: 'All 12 aesthetics + new drops', pro_f2: 'No watermark', pro_f3: 'Desktop 4K & printable A4', pro_f4: '30 daily-affirmation lock screens', pro_f5: 'Matching home screen + printable goals checklist', pro_f6: 'Use your own photos in every look',
+    pro_name: 'Pro', pro_once: 'one-time · yours forever', pro_f1: 'All 16 aesthetics + new drops', pro_f2: 'No watermark', pro_f3: 'Desktop 4K & printable A4', pro_f4: '30 daily-affirmation lock screens', pro_f5: 'Matching home screen + printable goals checklist', pro_f6: 'Use your own photos in every look',
     unlock: 'Unlock Pro', have_code: 'Already bought? Enter your code', tip: 'Or leave a tip',
     soon: 'Join the Pro waitlist',
     faq_title: 'Questions',

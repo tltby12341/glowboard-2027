@@ -230,6 +230,14 @@ function drawBackground(ctx, t, W, H, r) {
     ctx.fillStyle = 'rgba(62,141,184,0.10)'; const sw = u * 4;
     for (let x = 0; x < W; x += sw * 2) ctx.fillRect(x, 0, sw, H);
   }
+  if (t.pattern === 'checker') {
+    ctx.fillStyle = 'rgba(255,255,255,0.13)'; const s = u * 7;
+    for (let y = 0, row = 0; y < H; y += s, row++) for (let x = (row % 2) * s; x < W; x += s * 2) ctx.fillRect(x, y, s, s);
+  }
+  if (t.pattern === 'grid') {
+    ctx.strokeStyle = 'rgba(90,120,160,0.13)'; ctx.lineWidth = Math.max(1, u * 0.12); const s = u * 4;
+    ctx.beginPath(); for (let x = 0; x < W; x += s) { ctx.moveTo(x, 0); ctx.lineTo(x, H); } for (let y = 0; y < H; y += s) { ctx.moveTo(0, y); ctx.lineTo(W, y); } ctx.stroke();
+  }
   if (t.pattern === 'pearls') {
     for (let i = 0; i < 70; i++) {
       const x = r() * W, y = r() * H, s = u * (0.5 + r() * 0.9);
@@ -590,9 +598,10 @@ function drawTitle(ctx, t, state, box, u, lang, landscape) {
     g.addColorStop(0, '#F7E7C1'); g.addColorStop(0.5, '#D4AF6E'); g.addColorStop(1, '#9C7A3C'); ctx.fillStyle = g;
   } else if (t.titleChrome) {
     const g = ctx.createLinearGradient(0, baseY - size, 0, baseY);
-    g.addColorStop(0, '#FFFFFF'); g.addColorStop(0.38, '#CFC8FF'); g.addColorStop(0.52, '#6A55E0'); g.addColorStop(0.8, '#3A2690'); g.addColorStop(1, '#8F7CF0');
+    const cs = t.chromeStops || ['#FFFFFF', '#CFC8FF', '#6A55E0', '#3A2690', '#8F7CF0'];
+    [0, 0.38, 0.52, 0.8, 1].forEach((p, i) => g.addColorStop(p, cs[i]));
     ctx.fillStyle = g;
-    ctx.save(); ctx.shadowColor = 'rgba(80,50,200,0.35)'; ctx.shadowBlur = u * 2; ctx.shadowOffsetY = u * 0.6;
+    ctx.save(); ctx.shadowColor = t.chromeShadow || 'rgba(80,50,200,0.35)'; ctx.shadowBlur = u * 2; ctx.shadowOffsetY = u * 0.6;
     drawTracked(ctx, txt, cx, baseY, tracking, size); ctx.restore();
     ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = u * 0.35; drawTracked(ctx, txt, cx, baseY, tracking, size, 'stroke');
   } else ctx.fillStyle = t.ink;

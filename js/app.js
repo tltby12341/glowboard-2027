@@ -125,6 +125,9 @@ const VIBES = [
   { id: 'cozy', name: 'Cozy reset', theme: 'cozywinter', goals: ['cozy', 'home', 'peace', 'growth'], word: 'peace' },
   { id: 'student', name: 'Student glow-up', theme: 'mono', goals: ['study', 'growth', 'health', 'career'], word: 'focus' },
   { id: 'travel', name: 'Travel girl', theme: 'coastal', goals: ['travel', 'nature', 'friends', 'health'], word: 'adventure' },
+  { id: 'academia', name: 'Dark academia', theme: 'academia', goals: ['study', 'growth', 'creative', 'peace'], word: 'devotion' },
+  { id: 'pinky2k', name: 'Pink princess', theme: 'pinky2k', goals: ['glam', 'friends', 'style', 'selfcare', 'love'], word: 'iconic' },
+  { id: 'aspen', name: 'Ski season', theme: 'aspen', goals: ['cozy', 'travel', 'money', 'style'], word: 'elegance' },
 ];
 function renderVibes() {
   $('#vibes').innerHTML = VIBES.map((v) => { const t = themeById(v.theme); const bg = `linear-gradient(135deg, ${t.bg.join(', ')})`;
@@ -220,7 +223,7 @@ async function renderPreview() {
   const t = themeById(state.themeId);
   dev.classList.toggle('is-pro', t.pro && !isPro);
   updateDlLabel();
-  dev.classList.toggle('light', !['oldmoney', 'darkluxe', 'mobwife', 'cozywinter'].includes(t.id));
+  dev.classList.toggle('light', !['oldmoney', 'darkluxe', 'mobwife', 'cozywinter', 'academia'].includes(t.id));
   await renderBoard(cv, state, { width: w, height: h, kind: sz.kind, watermark: !isPro });
   const ft = $('#fabThumb canvas');
   if (ft) { ft.width = 96; ft.height = Math.round(96 * h / w); ft.getContext('2d').drawImage(cv, 0, 0, ft.width, ft.height); }

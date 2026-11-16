@@ -6,10 +6,10 @@ Glowboard is a static site (plain HTML, CSS and JS) hosted on GitHub Pages. User
 
 ## Business model
 - **Free:** 3 aesthetics (Clean Girl, Coquette, Old Money) and iPhone/Android PNGs with a small "glowboard · make yours free" watermark. The watermark is the viral loop.
-- **Pro ($4.99, one-time):** all 12 aesthetics, no watermark, Desktop 4K and A4 print sizes, 30 daily affirmation lock screens, a matching (blurred) home screen, and a printable A4 2027 goals checklist.
+- **Pro ($4.99, one-time):** all 16 aesthetics, no watermark, Desktop 4K and A4 print sizes, 30 daily affirmation lock screens, a matching (blurred) home screen, and a printable A4 2027 goals checklist.
 
 ## Features
-- 12 looks (3 free, 9 Pro), 19 goal categories with 152 affirmations, and 8 one-tap "quick start" vibes.
+- 16 looks (3 free, 13 Pro), 19 goal categories with 152 affirmations, and 8 one-tap "quick start" vibes.
 - Title styles (Serif, Script, Bold, Handwritten), tap-to-swap photos, and your own photos (kept on the device).
 - Sizes: iPhone, Android, IG/TikTok story (free); Desktop 4K, Print A4 (Pro).
 - Shareable template links: `?b=<base64url JSON>` rebuilds a board. Deep links: `?look=<themeId>` and `?goals=travel,money`.
