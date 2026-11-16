@@ -297,3 +297,9 @@ details p{margin:0 0 18px;color:var(--ink2)}
 
 .home-teaser{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;font-size:14px;margin:4px 0 8px;color:var(--ink2)}
 .home-teaser[hidden]{display:none}
+
+.pro-peek{display:flex;justify-content:center;margin:18px 0 6px}
+.pro-peek img{width:52px;height:auto;border-radius:9px;border:2px solid rgba(255,255,255,.18);box-shadow:0 10px 20px -10px rgba(0,0,0,.6);margin:0 -6px;transition:transform .25s}
+.pro-peek img:nth-child(1){transform:rotate(-10deg) translateY(6px)}.pro-peek img:nth-child(2){transform:rotate(-5deg)}.pro-peek img:nth-child(3){transform:translateY(-6px);z-index:2}.pro-peek img:nth-child(4){transform:rotate(5deg)}.pro-peek img:nth-child(5){transform:rotate(10deg) translateY(6px)}
+.plan.pro:hover .pro-peek img{transform:none;margin:0 2px}
+[hidden]{display:none!important}
