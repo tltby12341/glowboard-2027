@@ -1,0 +1,14 @@
+{
+ "travel":["travel-beach.webp","travel-paris.webp","travel-japan.webp","travel-santorini.webp"],
+ "money":["money-desk.webp","money-savings.webp","money-shopping.webp"],
+ "career":["career-laptop.webp","career-office.webp"],
+ "home":["home-living.webp","home-kitchen.webp"],
+ "health":["health-yoga.webp","health-smoothie.webp","health-running.webp"],
+ "love":["love-roses.webp","love-dinner.webp"],
+ "selfcare":["selfcare-bath.webp","selfcare-skincare.webp"],
+ "pets":["pets-puppy.webp"],
+ "growth":["growth-books.webp","growth-journal.webp"],
+ "nature":["nature-mountains.webp"],
+ "friends":["friends-toast.webp"],
+ "car":["car-dream.webp"]
+}

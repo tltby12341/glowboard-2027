@@ -1,0 +1,21 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>Glowboard unlock-code helper</title>
+<style>body{font-family:Inter,system-ui,sans-serif;background:#FBF7F2;color:#1D1B1A;max-width:640px;margin:40px auto;padding:0 20px;line-height:1.6}input{width:100%;padding:12px;border:1px solid #ccc;border-radius:12px;font-size:16px}code{background:#fff;border:1px solid #eee;border-radius:8px;padding:10px;display:block;word-break:break-all;margin-top:10px}button{margin-top:10px;padding:10px 18px;border:0;border-radius:999px;background:#1D1B1A;color:#fff;font-weight:600}</style></head>
+<body>
+<h1>Unlock-code helper / 解锁码助手</h1>
+<p>1. Make up a secret code, e.g. <b>GLOW-2027-x8k2</b>. 想一个只有你知道的解锁码。</p>
+<p>2. Type it below. The SHA-256 appears instantly. 在下面输入，会立即算出 SHA-256。</p>
+<input id="c" placeholder="your secret code" autocomplete="off">
+<code id="h">…</code>
+<button id="cp">Copy hash / 复制</button>
+<p>3. Paste the hash into <b>config.js → UNLOCK_CODE_SHA256</b>. 粘贴到 config.js 的 UNLOCK_CODE_SHA256。</p>
+<p>4. In Gumroad / Lemon Squeezy / Stripe, set the post-purchase redirect (or put this link in the receipt / thank-you message) to:<br>付款成功后的跳转链接（或写在收据里）设为：</p>
+<code id="u">https://tltby12341.github.io/glowboard-2027/?unlock=YOUR_CODE</code>
+<p>The code is never stored on this page or sent anywhere. 这个页面不会保存或上传任何内容。</p>
+<script>
+const c=document.getElementById('c'),h=document.getElementById('h'),u=document.getElementById('u');
+c.addEventListener('input',async()=>{const v=c.value.trim();if(!v){h.textContent='…';return}
+const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v));h.textContent=[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
+u.textContent='https://tltby12341.github.io/glowboard-2027/?unlock='+encodeURIComponent(v);});
+document.getElementById('cp').onclick=()=>navigator.clipboard.writeText(h.textContent);
+</script></body></html>
