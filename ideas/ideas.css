@@ -4,8 +4,8 @@ header{display:flex;justify-content:space-between;align-items:center;padding:14p
 .logo{font-family:"Instrument Serif",serif;font-style:italic;font-size:24px;text-decoration:none;color:inherit}
 .hcta{background:#1D1B1A;color:#fff;text-decoration:none;font-weight:600;font-size:14px;padding:9px 16px;border-radius:999px}
 article{max-width:760px;margin:0 auto;padding:28px 22px 60px}
-.crumbs{font-size:13px;color:#8a7f77}.crumbs a{color:inherit}
-.eyebrow{font-weight:700;color:#C8A26B;letter-spacing:.12em;font-size:12px;margin:22px 0 0}
+.crumbs{font-size:13px;color:#6b615a}.crumbs a{color:inherit}
+.eyebrow{font-weight:700;color:#866536;letter-spacing:.12em;font-size:12px;margin:22px 0 0}
 h1{font-family:"Instrument Serif",serif;font-weight:400;font-size:clamp(38px,6vw,58px);line-height:1.03;letter-spacing:-.02em;margin:8px 0 16px}
 h2{font-family:"Instrument Serif",serif;font-weight:400;font-size:32px;line-height:1.1;margin:42px 0 8px}
 p,li{font-size:17px;color:#3d3632}
@@ -21,10 +21,10 @@ details{background:#fff;border:1px solid rgba(0,0,0,.07);border-radius:16px;padd
 .hub{grid-template-columns:repeat(4,1fr)}
 .rel a,.hub a{text-decoration:none;color:inherit;font-weight:600;font-size:14px;text-align:center}
 .rel img,.hub img{width:100%;height:auto;aspect-ratio:540/1170;object-fit:cover;border-radius:16px;display:block;margin-bottom:6px;box-shadow:0 10px 24px -14px rgba(60,40,20,.5)}
-.hub span{display:block}.hub small{display:block;font-weight:400;color:#8a7f77;font-size:12.5px;line-height:1.4}
+.hub span{display:block}.hub small{display:block;font-weight:400;color:#6b615a;font-size:12.5px;line-height:1.4}
 .cat{margin:30px 0}.cat h2{margin-top:0}
-.fine{font-size:14px;color:#8a7f77}
-footer{text-align:center;padding:30px 20px 50px;font-size:14px;color:#8a7f77}footer a{color:inherit}
+.fine{font-size:14px;color:#6b615a}
+footer{text-align:center;padding:30px 20px 50px;font-size:14px;color:#6b615a}footer a{color:inherit}
 @media(max-width:640px){.hub{grid-template-columns:repeat(2,1fr)}.affs{columns:1}.phones{gap:8px}.phones img{border-width:3px;border-radius:14px}}
 table{width:100%;border-collapse:collapse;background:#fff;border-radius:16px;overflow:hidden;margin:14px 0;font-size:15.5px}th,td{text-align:left;padding:10px 14px;border-bottom:1px solid rgba(0,0,0,.06)}th{background:#f3ece4;font-weight:600}
 ol li::marker{color:#C8A26B;font-weight:700}
