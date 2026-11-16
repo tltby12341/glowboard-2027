@@ -647,6 +647,8 @@ export function renderAffirmation(canvas, themeId, text, seed, W = 1179, H = 255
 
 export async function ensureFonts() {
   if (!document.fonts) return;
+  const t0 = Date.now();
+  while (!Array.from(document.styleSheets).some((s) => (s.href || '').includes('fonts.googleapis')) && Date.now() - t0 < 4000) await new Promise((res) => setTimeout(res, 40));
   const specs = ['400 40px "Instrument Serif"', 'italic 400 40px "Instrument Serif"', '400 40px "Inter"', '600 40px "Inter"', '700 40px "Inter"', '800 40px "Inter"', '400 40px "Caveat"', '700 40px "Caveat"', '400 40px "Pinyon Script"', '800 40px "Syne"'];
   try { await Promise.all(specs.map((s) => document.fonts.load(s))); } catch (e) {}
 }

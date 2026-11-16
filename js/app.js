@@ -124,7 +124,7 @@ const VIBES = [
 ];
 function renderVibes() {
   $('#vibes').innerHTML = VIBES.map((v) => { const t = themeById(v.theme); const bg = `linear-gradient(135deg, ${t.bg.join(', ')})`;
-    return `<button type="button" class="vibe" role="listitem" data-vibe="${v.id}"><span class="sw" style="background:${bg}"><i style="background:${t.accent}"></i></span><span class="vn">${v.name}</span>${t.pro && !isPro ? '<b class="mini-pro">PRO</b>' : ''}</button>`; }).join('');
+    return `<button type="button" class="vibe" data-vibe="${v.id}"><span class="sw" style="background:${bg}"><i style="background:${t.accent}"></i></span><span class="vn">${v.name}</span>${t.pro && !isPro ? '<b class="mini-pro">PRO</b>' : ''}</button>`; }).join('');
 }
 $('#vibes').addEventListener('click', (e) => {
   const b = e.target.closest('[data-vibe]'); if (!b) return; const v = VIBES.find((x) => x.id === b.dataset.vibe);
@@ -146,14 +146,22 @@ $('#themeGrid').addEventListener('click', (e) => {
   if (matchMedia('(max-width:900px)').matches) $('#device').scrollIntoView({ behavior: 'smooth', block: 'center' });
 });
 let thumbTimer;
+let thumbsVisible = false, thumbsDirty = false, thumbGen = 0;
 function renderThumbs() {
+  if (!thumbsVisible) { thumbsDirty = true; return; }
   clearTimeout(thumbTimer);
   thumbTimer = setTimeout(async () => {
+    const gen = ++thumbGen;
     for (const b of $$('.theme')) {
+      if (gen !== thumbGen) return; // a newer render started
       await renderBoard(b.querySelector('canvas'), { ...state, themeId: b.dataset.theme }, { width: 236, height: 511 });
+      await new Promise((res) => (window.requestIdleCallback || setTimeout)(res, { timeout: 120 }));
     }
   }, 220);
 }
+new IntersectionObserver((ents, obs) => {
+  if (ents.some((e) => e.isIntersecting)) { thumbsVisible = true; obs.disconnect(); if (thumbsDirty) renderThumbs(); }
+}, { rootMargin: '600px 0px' }).observe($('#themeGrid'));
 
 // ---------- step 3 ----------
 $('#titleInput').addEventListener('input', (e) => { state.title = e.target.value; schedule(false); });

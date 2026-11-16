@@ -21,7 +21,7 @@
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&family=Pinyon+Script&family=Syne:wght@800&display=swap" rel="stylesheet">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&family=Pinyon+Script&family=Syne:wght@800&display=swap" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&family=Pinyon+Script&family=Syne:wght@800&display=swap"></noscript>
 <link rel="stylesheet" href="styles.css">
 <script src="config.js"></script>
 <script type="application/ld+json">
@@ -53,12 +53,12 @@
     <div class="hero-copy">
       <p class="kicker"><span class="dot"></span><span data-i18n="hero_kicker">The 2027 vision board, made for your phone</span></p>
       <h1><span data-i18n="hero_title_a">Your 2027,</span><br><em data-i18n="hero_title_b">on your lock screen.</em></h1>
-      <p class="sub" data-i18n="hero_sub"></p>
+      <p class="sub" data-i18n="hero_sub">Pick your goals and your aesthetic. Get a gorgeous vision board wallpaper sized for your phone in about 60 seconds. No sign-up, no Canva rabbit hole.</p>
       <div class="hero-ctas">
         <a class="btn btn-primary" href="#make" data-i18n="hero_cta">Make my vision board, free</a>
         <a class="btn btn-ghost" href="#looks" data-i18n="hero_cta2">See the looks</a>
       </div>
-      <p class="note" data-i18n="hero_note"></p>
+      <p class="note" data-i18n="hero_note">Free to make · Photos never leave your phone</p>
     </div>
     <div class="hero-phones" aria-hidden="true">
       <div class="phone p1"><canvas data-hero="0"></canvas><div class="lock"><div class="island"></div><div class="date"></div><div class="time">9:41</div></div></div>
@@ -93,11 +93,11 @@
     <div class="maker-controls">
       <div class="vibes-wrap">
         <p class="vibes-title"><b>Quick start:</b> pick a vibe, tweak later</p>
-        <div class="vibes" id="vibes" role="list"></div>
+        <div class="vibes" id="vibes"></div>
       </div>
       <div class="step">
         <div class="step-head"><span class="num">1</span><h2 data-i18n="step1">Pick your goals</h2></div>
-        <p class="hint" data-i18n="step1_hint"></p>
+        <p class="hint" data-i18n="step1_hint">Tap the parts of life you want to grow in 2027. Each one adds a photo and an affirmation.</p>
         <div class="chips" id="goalChips"></div>
         <label class="field-label" for="customInput" data-i18n="custom_label">Add your own goals (optional)</label>
         <form class="custom-row" id="customForm">
@@ -110,7 +110,7 @@
 
       <div class="step" id="looks">
         <div class="step-head"><span class="num">2</span><h2 data-i18n="step2">Pick your aesthetic</h2></div>
-        <p class="hint" data-i18n="step2_hint"></p>
+        <p class="hint" data-i18n="step2_hint">Tap to preview any look. Pro looks preview free; unlocking is only needed to download.</p>
         <div class="themes" id="themeGrid"></div>
       </div>
 
@@ -130,7 +130,7 @@
         </div>
         <label class="switch"><input type="checkbox" id="clockToggle" checked><span class="slider"></span><span data-i18n="clock_label">Leave space for the clock</span></label>
         <div class="photos">
-          <div><strong data-i18n="photos_label">Add your own photos</strong><p class="hint small" data-i18n="photos_hint"></p></div>
+          <div><strong data-i18n="photos_label">Add your own photos</strong><p class="hint small" data-i18n="photos_hint">Stays on your device, never uploaded.</p></div>
           <div class="photo-btns">
             <label class="btn btn-soft file"><input type="file" id="photoInput" accept="image/*" multiple><span data-i18n="photos_btn">Choose photos</span></label>
             <button class="link-btn" id="clearPhotos" type="button" hidden data-i18n="photos_clear">Remove my photos</button>
@@ -144,7 +144,7 @@
           <button type="button" data-size="print"><span data-i18n="size_print">Print A4</span> <b class="mini-pro">PRO</b></button>
         </div>
         <div class="aff-teaser">
-          <div><strong data-i18n="aff_title">30 daily affirmation lock screens</strong><p class="hint small" data-i18n="aff_sub"></p></div>
+          <div><strong data-i18n="aff_title">30 daily affirmation lock screens</strong><p class="hint small" data-i18n="aff_sub">A fresh lock screen for every day of the month, in your aesthetic.</p></div>
           <button class="btn btn-soft" id="affBtn" type="button" data-i18n="aff_open">Open my affirmation pack</button>
         </div>
         <div class="aff-teaser">
@@ -158,30 +158,30 @@
   <section class="why">
     <h2 class="section-title" data-i18n="why_title">Why put it on your lock screen?</h2>
     <div class="why-grid">
-      <article><span class="why-ico">☀︎</span><h3 data-i18n="why1_t"></h3><p data-i18n="why1_d"></p></article>
-      <article><span class="why-ico">✎</span><h3 data-i18n="why2_t"></h3><p data-i18n="why2_d"></p></article>
-      <article><span class="why-ico">♡</span><h3 data-i18n="why3_t"></h3><p data-i18n="why3_d"></p></article>
+      <article><span class="why-ico">☀︎</span><h3 data-i18n="why1_t">You see it all day</h3><p data-i18n="why1_d">A paper board ends up in a drawer. Your lock screen shows up every time you pick up your phone.</p></article>
+      <article><span class="why-ico">✎</span><h3 data-i18n="why2_t">It keeps your goals specific</h3><p data-i18n="why2_d">Writing goals down and looking at them often keeps them on your mind. Your board puts your words in front of you all day.</p></article>
+      <article><span class="why-ico">♡</span><h3 data-i18n="why3_t">It makes your phone pretty</h3><p data-i18n="why3_d">Your phone gets a wallpaper you actually love, and it lines up with your goals.</p></article>
     </div>
   </section>
 
   <section class="pricing" id="pricing">
     <h2 class="section-title" data-i18n="pricing_title">Simple pricing</h2>
-    <p class="section-sub" data-i18n="pricing_sub"></p>
+    <p class="section-sub" data-i18n="pricing_sub">Make and download your board free. Upgrade if you want every look.</p>
     <div class="plans">
       <div class="plan">
         <h3 data-i18n="free_name">Free</h3>
         <p class="price"><span data-i18n="free_price">$0</span></p>
-        <ul><li data-i18n="free_f1"></li><li data-i18n="free_f2"></li><li data-i18n="free_f3"></li><li data-i18n="free_f4"></li></ul>
+        <ul><li data-i18n="free_f1">3 aesthetics</li><li data-i18n="free_f2">iPhone &amp; Android sizes</li><li data-i18n="free_f3">Small "glowboard" mark</li><li data-i18n="free_f4">Unlimited shuffles</li></ul>
         <a class="btn btn-ghost wide" href="#make" data-i18n="nav_make">Make yours</a>
       </div>
       <div class="plan pro">
         <div class="glow-badge">✦ Best value</div>
         <h3 data-i18n="pro_name">Pro</h3>
-        <p class="price"><span class="pro-price">$4.99</span> <small data-i18n="pro_once"></small></p>
-        <ul><li data-i18n="pro_f1"></li><li data-i18n="pro_f2"></li><li data-i18n="pro_f3"></li><li data-i18n="pro_f4"></li><li data-i18n="pro_f5"></li></ul>
+        <p class="price"><span class="pro-price">$4.99</span> <small data-i18n="pro_once">one-time · yours forever</small></p>
+        <ul><li data-i18n="pro_f1">All 12 aesthetics + new drops</li><li data-i18n="pro_f2">No watermark</li><li data-i18n="pro_f3">Desktop 4K &amp; printable A4</li><li data-i18n="pro_f4">30 daily-affirmation lock screens</li><li data-i18n="pro_f5">Use your own photos in every look</li></ul>
         <button class="btn btn-primary wide unlock-btn" type="button" data-i18n="unlock">Unlock Pro</button>
         <button class="link-btn code-btn" type="button" data-i18n="have_code">Already bought? Enter your code</button>
-        <a class="link-btn tip-link" hidden target="_blank" rel="noopener" data-i18n="tip">Or leave a tip</a>
+        <a class="link-btn tip-link" href="#" hidden target="_blank" rel="noopener" data-i18n="tip">Or leave a tip</a>
       </div>
     </div>
   </section>
@@ -194,7 +194,7 @@
 
 <footer class="footer">
   <div class="logo small"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 1.5c.6 4.9 2.3 8.6 10.5 10.5-8.2 1.9-9.9 5.6-10.5 10.5C11.4 17.6 9.7 13.9 1.5 12 9.7 10.1 11.4 6.4 12 1.5z" fill="#C8A26B"/></svg><span>glowboard</span></div>
-  <p data-i18n="footer_privacy"></p>
+  <p data-i18n="footer_privacy">Privacy: no accounts and no tracking cookies. Your photos stay on your device.</p>
   <p><a id="contactLink" href="#">Contact</a> · <a href="guide/vision-board-lock-screen.html">Lock screen guide</a> · <a href="ideas/">Wallpaper ideas</a> · <a href="ideas/2027-affirmations-wallpaper.html">2027 affirmations</a></p>
   <p class="foot-looks"><a href="ideas/coquette-vision-board-wallpaper.html">Coquette</a> · <a href="ideas/old-money-vision-board.html">Old money</a> · <a href="ideas/clean-girl-vision-board.html">Clean girl</a> · <a href="ideas/mob-wife-aesthetic-wallpaper.html">Mob wife</a> · <a href="ideas/dark-luxury-vision-board.html">Dark luxury</a> · <a href="ideas/y2k-vision-board-wallpaper.html">Y2K</a> · <a href="ideas/cozy-winter-wallpaper-iphone.html">Cozy winter</a> · <a href="ideas/coastal-summer-vision-board.html">Coastal</a></p>
   <p>© 2026 Glowboard</p>
@@ -212,7 +212,7 @@
     <button class="close" type="button" data-close aria-label="Close">×</button>
     <h3 id="resultTitle" data-i18n="modal_ready">Your 2027 is ready ✨</h3>
     <div class="result-wrap"><img id="resultImg" alt="Your vision board wallpaper"></div>
-    <p class="hint small ios-hint" data-i18n="modal_ios"></p>
+    <p class="hint small ios-hint" data-i18n="modal_ios">On iPhone: tap Save image, or long-press the picture and choose "Save to Photos".</p>
     <div class="result-actions">
       <a class="btn btn-primary" id="saveLink" download="glowboard-2027.png" data-i18n="modal_save">Save image</a>
       <button class="btn btn-soft" id="shareBtn" type="button" data-i18n="modal_share">Share</button>
@@ -223,7 +223,7 @@
       <a class="pill" id="xLink" target="_blank" rel="noopener">X</a>
       <a class="pill" id="waLink" target="_blank" rel="noopener">WhatsApp</a>
     </div>
-    <div class="howto"><strong data-i18n="modal_set">How to set it</strong><p data-i18n="modal_set_ios"></p><p data-i18n="modal_set_and"></p></div>
+    <div class="howto"><strong data-i18n="modal_set">How to set it</strong><p data-i18n="modal_set_ios">iPhone: Photos → Share → Use as Wallpaper</p><p data-i18n="modal_set_and">Android: Gallery → ⋮ → Set as wallpaper → Lock screen</p></div>
     <div class="upsell2" id="resultUpsell">
       <canvas id="upsellCv" aria-hidden="true"></canvas>
       <div><strong>Love it? Make it clean.</strong><p>Remove the watermark and unlock all 12 looks, 4K and print sizes. <span class="pro-price">$4.99</span> once.</p><button class="btn btn-dark up-btn" type="button" id="upsellBtn">See Pro</button></div>
@@ -271,7 +271,7 @@
   <div class="sheet wide">
     <button class="close" type="button" data-close aria-label="Close">×</button>
     <h3 data-i18n="aff_title">30 daily affirmation lock screens</h3>
-    <p class="hint" data-i18n="aff_sub"></p>
+    <p class="hint" data-i18n="aff_sub">A fresh lock screen for every day of the month, in your aesthetic.</p>
     <div class="aff-grid" id="affGrid"></div>
   </div>
 </div>
