@@ -147,7 +147,11 @@ function buildThemeGrid() {
   $('#themeGrid').innerHTML = THEMES.map((t) => `<button type="button" class="theme" data-theme="${t.id}"><canvas width="236" height="511"></canvas><span class="tname"><span>${t.name}</span><span class="badge ${t.pro ? 'pro' : ''}">${t.pro ? 'PRO' : T('free')}</span></span></button>`).join('');
   markTheme();
 }
-function markTheme() { $$('.theme').forEach((b) => b.classList.toggle('on', b.dataset.theme === state.themeId)); }
+function markTheme() {
+  $$('.theme').forEach((b) => b.classList.toggle('on', b.dataset.theme === state.themeId));
+  const g = $('#themeGrid'), on = g && g.querySelector('.theme.on');
+  if (on && g.scrollWidth > g.clientWidth + 4) { const x = on.offsetLeft - g.offsetLeft - 18; if (x < g.scrollLeft || x + on.offsetWidth > g.scrollLeft + g.clientWidth) g.scrollTo({ left: Math.max(0, x), behavior: 'smooth' }); }
+}
 $('#themeGrid').addEventListener('click', (e) => {
   const b = e.target.closest('[data-theme]'); if (!b) return;
   state.themeId = b.dataset.theme; markTheme(); schedule(false); track('theme', { id: state.themeId });
