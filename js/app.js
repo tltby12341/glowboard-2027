@@ -185,7 +185,7 @@ $('#sizeSeg').addEventListener('click', (e) => {
   const b = e.target.closest('[data-size]'); if (!b) return;
   state.size = b.dataset.size; $$('#sizeSeg button').forEach((x) => x.classList.toggle('on', x === b));
   const dev = $('#device');
-  dev.classList.toggle('landscape', state.size === 'desktop'); dev.classList.toggle('paper', state.size === 'print');
+  dev.classList.toggle('landscape', state.size === 'desktop'); dev.classList.toggle('paper', state.size === 'print'); dev.classList.toggle('story', state.size === 'story');
   schedule(false);
 });
 $('#shuffleBtn').addEventListener('click', () => { state.seed = Math.floor(Math.random() * 1e6) + 1; state.swaps = {}; schedule(true); track('shuffle'); });
@@ -256,7 +256,7 @@ async function download() {
     const cv = document.createElement('canvas');
     await renderBoard(cv, state, { width: sz.w, height: sz.h, kind: sz.kind, watermark: !isPro });
     const blob = await new Promise((res) => cv.toBlob(res, 'image/png'));
-    showResult(blob);
+    showResult(blob, state.size === 'story' ? 'glowboard-2027-story.png' : undefined);
     track('download_ok', { theme: state.themeId, size: state.size, pro: isPro });
   } finally {
     btns.forEach((b) => { b.disabled = false; b.innerHTML = b.dataset.old; });
@@ -268,7 +268,7 @@ function showResult(blob, name) {
   $('#resultImg').src = lastUrl; $('#saveLink').href = lastUrl; $('#saveLink').download = name || 'glowboard-2027.png';
   $('#resultUpsell').style.display = isPro ? 'none' : '';
   $('#homeBtn').innerHTML = isPro ? 'Get it' : 'Get it <b class="mini-pro">PRO</b>';
-  $('#homeTeaser').hidden = !!(name && name !== 'glowboard-2027.png') || ['desktop', 'print'].includes(state.size);
+  $('#homeTeaser').hidden = !!(name && name !== 'glowboard-2027.png') || ['desktop', 'print', 'story'].includes(state.size);
   if (!isPro) renderBoard($('#upsellCv'), state, { width: 140, height: 303, watermark: false });
   const text = T('share_text');
   const link = templateLink();

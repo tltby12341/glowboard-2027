@@ -307,3 +307,6 @@ details p{margin:0 0 18px;color:var(--ink2)}
 .chip.extra{display:none}
 .chips.all .chip.extra,.chip.extra.on{display:inline-flex}
 .more-chip{border-style:dashed!important;color:var(--ink2)}
+
+.device.story{aspect-ratio:1080/1920;border-radius:26px}
+.device.story .lock{display:none}
