@@ -4,7 +4,7 @@
 window.GLOWBOARD_CONFIG = {
   // 1) Paste your payment link (Gumroad / Lemon Squeezy / Stripe Payment Link / Ko-fi shop).
   //    Leave empty to show a "Join the Pro waitlist" email button instead.
-  PRO_PAYMENT_URL: "",
+  PRO_PAYMENT_URL: "https://qiny.gumroad.com/l/glowboard-pro",
   PRO_PRICE_LABEL: "$4.99",
 
   // 2) In your payment product settings, set the redirect / thank-you URL to:
@@ -15,7 +15,7 @@ window.GLOWBOARD_CONFIG = {
   TIP_URL: "",
 
   // 4) Your contact email (shown in footer, used for waitlist + refunds)
-  CONTACT_EMAIL: "hello@example.com",
+  CONTACT_EMAIL: "qiny0015@gmail.com",
 
   // 5) Optional analytics script src (Plausible / Umami / Cloudflare). Leave empty for none.
   ANALYTICS_SNIPPET_URL: "",
