@@ -124,7 +124,7 @@ export const STRINGS = {
       ['Can I send my board to a friend?', 'Yes. Tap "Send this board to a friend" under the preview. The link opens your exact board (goals, look, title and layout) so they can make it their own. Your uploaded photos are never included.'],
       ['Can I change a photo I do not like?', 'Tap any photo in the live preview to swap it for another one. Shuffle gives you a whole new layout.'],
     ],
-    footer_privacy: 'Privacy: no accounts and no tracking cookies. Your photos stay on your device.',
+    footer_privacy: 'Privacy: no accounts and no tracking cookies. Your photos stay on your device. We use GoatCounter, a privacy-friendly analytics tool with no cookies.',
     modal_ready: 'Your 2027 is ready ✨', modal_save: 'Save image', modal_share: 'Share', modal_copy: 'Copy link', copied: 'Link copied!',
     modal_ios: 'On iPhone: tap Save image, or long-press the picture and choose "Save to Photos".',
     modal_set: 'How to set it',

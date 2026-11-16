@@ -17,7 +17,9 @@ window.GLOWBOARD_CONFIG = {
   // 4) Your contact email (shown in footer, used for waitlist + refunds)
   CONTACT_EMAIL: "qiny0015@gmail.com",
 
-  // 5) Optional analytics script src (Plausible / Umami / Cloudflare). Leave empty for none.
+  // 5) Optional extra analytics script src (Plausible / Umami). Leave empty for none.
+  //    GoatCounter is included as a static <script> on every HTML page (do not
+  //    also set ANALYTICS_SNIPPET_URL to count.js, or pageviews will double-count).
   ANALYTICS_SNIPPET_URL: "",
   ANALYTICS_DOMAIN: ""
 };

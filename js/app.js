@@ -73,6 +73,31 @@ const T = (k) => (STRINGS[state.lang] && STRINGS[state.lang][k]) ?? STRINGS.en[k
 
 function track(name, props) { try { window.plausible && window.plausible(name, { props }); window.umami && window.umami.track(name, props); } catch (e) {} }
 
+// GoatCounter custom events. Safe if the script is blocked or still loading.
+function gcEvent(path, title) {
+  try {
+    const payload = { path, title: title || path, event: true };
+    if (window.goatcounter && typeof window.goatcounter.count === 'function') {
+      window.goatcounter.count(payload);
+      return;
+    }
+    const q = (window.__gcQueue = window.__gcQueue || []);
+    q.push(payload);
+    if (window.__gcFlushScheduled) return;
+    window.__gcFlushScheduled = true;
+    const t0 = Date.now();
+    const id = setInterval(() => {
+      if (window.goatcounter && typeof window.goatcounter.count === 'function') {
+        clearInterval(id);
+        q.splice(0).forEach((item) => { try { window.goatcounter.count(item); } catch (e) {} });
+      } else if (Date.now() - t0 > 8000) {
+        clearInterval(id); // script blocked or failed: drop the queue quietly
+        q.length = 0;
+      }
+    }, 100);
+  } catch (e) {}
+}
+
 // ---------- i18n ----------
 function applyI18n() {
   $$('[data-i18n]').forEach((el) => { const v = T(el.dataset.i18n); if (typeof v === 'string') el.textContent = v; });
@@ -145,6 +170,8 @@ $('#vibes').addEventListener('click', (e) => {
   Object.assign(state, { themeId: v.theme, goals: v.goals.slice(), word: v.word, swaps: {}, seed: Math.floor(Math.random() * 1e6) + 1 });
   $('#wordInput').value = state.word; $$('.vibe').forEach((x) => x.classList.toggle('on', x === b));
   renderChips(); markTheme(); schedule(true); track('vibe', { vibe: v.id });
+  gcEvent('look-' + v.theme, v.name);
+  if (!isPro && themeById(v.theme).pro) gcEvent('pro-locked-look', v.name);
   if (matchMedia('(max-width: 900px)').matches) $('#device').scrollIntoView({ behavior: 'smooth', block: 'center' });
 });
 
@@ -161,6 +188,9 @@ function markTheme() {
 $('#themeGrid').addEventListener('click', (e) => {
   const b = e.target.closest('[data-theme]'); if (!b) return;
   state.themeId = b.dataset.theme; markTheme(); schedule(false); track('theme', { id: state.themeId });
+  const picked = themeById(state.themeId);
+  gcEvent('look-' + state.themeId, picked && picked.name);
+  if (!isPro && picked && picked.pro) gcEvent('pro-locked-look', picked.name);
   if (matchMedia('(max-width:900px)').matches) $('#device').scrollIntoView({ behavior: 'smooth', block: 'center' });
 });
 let thumbTimer;
@@ -277,6 +307,8 @@ async function download() {
     showResult(blob, state.size === 'story' ? 'glowboard-2027-story.png' : undefined);
     if (k < 1) toast('Saved at a lighter size: your browser was low on memory.');
     track('download_ok', { theme: state.themeId, size: state.size, pro: isPro, scale: k });
+    if (!isPro) gcEvent('free-download', 'Free ' + state.size + ' download');
+    if (state.size === 'story') gcEvent('story-export', 'Story size export');
   } catch (e) {
     toast('Something went wrong. Please try again.'); track('download_fail', { size: state.size });
   } finally {
@@ -349,9 +381,9 @@ async function copyText(s) {
     let ok = false; try { ok = document.execCommand('copy'); } catch (_) {} ta.remove(); return ok;
   }
 }
-$('#copyBtn').addEventListener('click', async () => { if (await copyText(templateLink())) toast('Template link copied. Anyone who opens it gets your board ✨'); track('copy_link'); });
+$('#copyBtn').addEventListener('click', async () => { if (await copyText(templateLink())) toast('Template link copied. Anyone who opens it gets your board ✨'); track('copy_link'); gcEvent('share-link', 'Copy template link'); });
 $('#tplBtn').addEventListener('click', async () => {
-  const url = templateLink(); track('template_share');
+  const url = templateLink(); track('template_share'); gcEvent('share-link', 'Share template link');
   if (navigator.share && matchMedia('(pointer:coarse)').matches) { try { await navigator.share({ title: 'My 2027 vision board', text: 'Make one like mine (free) ✨', url }); return; } catch (e) { if (e.name === 'AbortError') return; } }
   if (await copyText(url)) toast('Link copied. Your friend will open this exact board ✨');
 });
@@ -378,20 +410,24 @@ function openPay(reason) {
   }
   strip.querySelectorAll('figure').forEach((f, i) => f.classList.toggle('on', THEMES.filter((t) => t.pro)[i].id === proTheme));
   track('paywall_view', { theme: state.themeId, size: state.size, reason: reason || '' });
+  gcEvent('paywall-shown', reason || 'paywall');
 }
 $$('.gift-btn').forEach((b) => b.addEventListener('click', () => {
   track('gift_pro_click');
+  gcEvent('gift-click', 'Gift Pro');
   if (CFG.PRO_PAYMENT_URL) window.open(CFG.PRO_PAYMENT_URL + (CFG.PRO_PAYMENT_URL.includes('?') ? '&' : '?') + 'wanted=true', '_blank', 'noopener');
   else location.href = `mailto:${CFG.CONTACT_EMAIL}?subject=${encodeURIComponent('Gift Glowboard Pro')}`;
 }));
 $('#giftFreeBtn').addEventListener('click', () => {
   track('gift_free_click');
+  gcEvent('gift-click', 'Gift free board');
   if (state.title === '2027') { state.title = 'Your 2027'; $('#titleInput').value = state.title; schedule(false); }
   $('#make').scrollIntoView({ behavior: 'smooth' });
   setTimeout(() => toast('Design it for them, then tap “Send this board to a friend” 💌'), 700);
 });
 $$('.unlock-btn').forEach((b) => b.addEventListener('click', () => {
   track('unlock_click');
+  gcEvent('buy-click', 'Unlock Pro');
   if (CFG.PRO_PAYMENT_URL) window.open(CFG.PRO_PAYMENT_URL, '_blank', 'noopener');
   else location.href = `mailto:${CFG.CONTACT_EMAIL}?subject=${encodeURIComponent('Glowboard Pro waitlist')}&body=${encodeURIComponent('Hi! Please let me know when Glowboard Pro is live.')}`;
 }));
@@ -413,8 +449,12 @@ async function sha256(s) {
 async function tryUnlock(code) {
   if (!code || !CFG.UNLOCK_CODE_SHA256 || !crypto.subtle) return false;
   const h = await sha256(code);
-  if (h.toLowerCase() !== CFG.UNLOCK_CODE_SHA256.toLowerCase()) return false;
+  if (h.toLowerCase() !== CFG.UNLOCK_CODE_SHA256.toLowerCase()) {
+    gcEvent('unlock-fail', 'Unlock failed');
+    return false;
+  }
   store.set('gb_pro', '1'); isPro = true; renderVibes(); confetti(); toast(T('unlocked')); schedule(true); track('unlocked');
+  gcEvent('unlock-success', 'Unlock success');
   return true;
 }
 
@@ -467,13 +507,13 @@ $('#setBtn').addEventListener('click', async () => {
     const zfile = new File([zip], 'glowboard-2027-set.zip', { type: 'application/zip' });
     // iPhone/iPad: the share sheet ("Save to Files") is more reliable than a blob download, especially in in-app browsers
     if (IS_IOS && navigator.canShare && navigator.canShare({ files: [zfile] })) {
-      try { await navigator.share({ files: [zfile] }); toast('Choose “Save to Files” to keep your set ✨'); track('set_ok', { via: 'share' }); return; }
+      try { await navigator.share({ files: [zfile] }); toast('Choose “Save to Files” to keep your set ✨'); track('set_ok', { via: 'share' }); gcEvent('pro-zip-download', 'Pro set zip'); return; }
       catch (err) { if (err && err.name === 'AbortError') return; }
     }
     if (IN_APP) toast('If nothing downloads, tap ⋯ and choose Open in Safari / your browser.');
     const a = document.createElement('a'); a.href = URL.createObjectURL(zip); a.download = 'glowboard-2027-set.zip'; document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 60000);
-    if (!IN_APP) toast(skipped.length ? 'Set downloading (some files skipped, see READ-ME) ✨' : 'Your 2027 set is downloading ✨'); track('set_ok', { lighter: lighter.length, skipped: skipped.length });
+    if (!IN_APP) toast(skipped.length ? 'Set downloading (some files skipped, see READ-ME) ✨' : 'Your 2027 set is downloading ✨'); track('set_ok', { lighter: lighter.length, skipped: skipped.length }); gcEvent('pro-zip-download', 'Pro set zip');
   } catch (e) {
     toast('Something went wrong making the set. Please try again.'); track('set_fail');
   } finally { b.disabled = false; b.innerHTML = old; }
