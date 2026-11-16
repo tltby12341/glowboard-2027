@@ -324,10 +324,29 @@ export function buildItems(state, manifest, lang) {
 }
 
 // ---------- main render ----------
+const TITLE_FONTS = {
+  serif: { titleFont: '"Instrument Serif", serif', titleItalic: false, titleWeight: 400, titleCaps: false, titleTracking: 0, titleScale: 1 },
+  script: { titleFont: '"Pinyon Script", cursive', titleItalic: false, titleWeight: 400, titleCaps: false, titleTracking: 0, titleScale: 1.08 },
+  bold: { titleFont: '"Syne", "Inter", sans-serif', titleItalic: false, titleWeight: 800, titleCaps: false, titleTracking: -0.02, titleScale: 0.92 },
+  hand: { titleFont: '"Caveat", cursive', titleItalic: false, titleWeight: 700, titleCaps: false, titleTracking: 0, titleScale: 1.15 },
+};
+function swapPhotos(photos, swaps, manifest) {
+  if (!swaps || !manifest) return;
+  const all = Object.values(manifest).flat().map((f) => 'assets/img/' + f);
+  Object.entries(swaps).forEach(([k, n]) => {
+    const i = +k, p = photos[i]; if (!p || p.user || !n) return;
+    const used = new Set(photos.map((q) => q.src));
+    const own = ((p.cat && manifest[p.cat]) || []).map((f) => 'assets/img/' + f);
+    const pool = [...new Set([...own, ...all])].filter((s) => s === p.src || !used.has(s));
+    const at = pool.indexOf(p.src);
+    p.src = pool[(at + n) % pool.length]; p.img = null;
+  });
+}
 export async function renderBoard(canvas, state, opts = {}) {
   const manifest = await loadManifest();
   const lang = state.lang || 'en';
-  const t = themeById(state.themeId);
+  let t = themeById(state.themeId);
+  if (state.font && TITLE_FONTS[state.font]) t = { ...t, ...TITLE_FONTS[state.font] };
   const W = opts.width || canvas.width, H = opts.height || canvas.height;
   if (canvas.width !== W) canvas.width = W;
   if (canvas.height !== H) canvas.height = H;
@@ -337,6 +356,7 @@ export async function renderBoard(canvas, state, opts = {}) {
   const u = (landscape ? H : W) / 100;
 
   const { photos, texts } = buildItems(state, manifest, lang);
+  swapPhotos(photos, state.swaps, manifest);
   await Promise.all(photos.map(async (p) => { if (!p.img && p.src) p.img = await loadImage(p.src); }));
 
   ctx.save();
@@ -366,12 +386,13 @@ export async function renderBoard(canvas, state, opts = {}) {
   const items = []; let pi = 0, ti = 0;
   cells.forEach((c, i) => {
     if (textIdx.has(i)) items.push({ ...texts[ti++], cell: c });
-    else items.push({ ...photos[pi++], cell: c });
+    else { items.push({ ...photos[pi], pidx: pi, cell: c }); pi++; }
   });
 
   const gap = t.gap * u;
   const scrap = t.rotate > 0;
   const drawOrder = scrap ? items.slice().sort(() => r() - 0.5) : items;
+  canvas._items = items.map((it) => ({ type: it.type, pidx: it.pidx, user: !!it.user, x: it.cell.x, y: it.cell.y, w: it.cell.w, h: it.cell.h }));
   for (const it of drawOrder) {
     const c = it.cell;
     let x = c.x + gap / 2, y = c.y + gap / 2, w = c.w - gap, h = c.h - gap;

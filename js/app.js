@@ -12,7 +12,7 @@ const previewPro = params.get('pro') === 'preview';
 // ---------- shareable template links ----------
 function b64u(s) { return btoa(String.fromCharCode(...new TextEncoder().encode(s))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
 function unb64u(s) { const b = atob(s.replace(/-/g, '+').replace(/_/g, '/')); return new TextDecoder().decode(Uint8Array.from(b, (c) => c.charCodeAt(0))); }
-function encodeBoard() { return b64u(JSON.stringify({ g: state.goals, t: state.themeId, ti: state.title, w: state.word, c: state.custom, s: state.seed })); }
+function encodeBoard() { return b64u(JSON.stringify({ g: state.goals, t: state.themeId, ti: state.title, w: state.word, c: state.custom, s: state.seed, f: state.font || undefined, sw: Object.keys(state.swaps || {}).length ? state.swaps : undefined })); }
 function decodeBoard(s) {
   try {
     const o = JSON.parse(unb64u(s)); const cats = new Set(CATEGORIES.map((c) => c.id)); const out = {};
@@ -21,6 +21,8 @@ function decodeBoard(s) {
     if (typeof o.ti === 'string') out.title = o.ti.slice(0, 24);
     if (typeof o.w === 'string') out.word = o.w.slice(0, 24);
     if (Array.isArray(o.c)) out.custom = o.c.filter((x) => typeof x === 'string').map((x) => x.slice(0, 60)).slice(0, 6);
+    if (['serif', 'script', 'bold', 'hand'].includes(o.f)) out.font = o.f;
+    if (o.sw && typeof o.sw === 'object') { const sw = {}; Object.entries(o.sw).slice(0, 10).forEach(([k, v]) => { if (/^\d$/.test(k) && Number.isFinite(v)) sw[k] = Math.abs(Math.floor(v)) % 100; }); out.swaps = sw; }
     if (Number.isFinite(o.s)) out.seed = Math.abs(Math.floor(o.s)) % 1e7 || 1;
     return out;
   } catch (e) { return null; }
@@ -52,6 +54,8 @@ const state = {
   title: '2027',
   word: '',
   clockSafe: true,
+  font: '',
+  swaps: {},
   userPhotos: [],
   seed: Math.floor(Math.random() * 1e6) + 1,
   size: 'iphone',
@@ -88,7 +92,7 @@ $('#goalChips').addEventListener('click', (e) => {
   const id = b.dataset.goal;
   if (state.goals.includes(id)) { if (state.goals.length > 1) state.goals = state.goals.filter((g) => g !== id); }
   else { state.goals.push(id); if (state.goals.length > 7) state.goals.shift(); }
-  renderChips(); schedule(true);
+  state.swaps = {}; renderChips(); schedule(true);
 });
 $('#customForm').addEventListener('submit', (e) => {
   e.preventDefault(); const v = $('#customInput').value.trim(); if (!v) return;
@@ -103,7 +107,7 @@ $('#surpriseBtn').addEventListener('click', () => {
   state.themeId = THEMES[Math.floor(Math.random() * THEMES.length)].id;
   state.word = WORDS[state.lang][Math.floor(Math.random() * WORDS[state.lang].length)];
   $('#wordInput').value = state.word;
-  state.seed = Math.floor(Math.random() * 1e6) + 1;
+  state.seed = Math.floor(Math.random() * 1e6) + 1; state.swaps = {};
   renderChips(); markTheme(); schedule(true); track('surprise');
 });
 
@@ -149,7 +153,23 @@ $('#sizeSeg').addEventListener('click', (e) => {
   dev.classList.toggle('landscape', state.size === 'desktop'); dev.classList.toggle('paper', state.size === 'print');
   schedule(false);
 });
-$('#shuffleBtn').addEventListener('click', () => { state.seed = Math.floor(Math.random() * 1e6) + 1; schedule(true); track('shuffle'); });
+$('#shuffleBtn').addEventListener('click', () => { state.seed = Math.floor(Math.random() * 1e6) + 1; state.swaps = {}; schedule(true); track('shuffle'); });
+$('#fontSeg').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-font]'); if (!b) return;
+  state.font = b.dataset.font; $$('#fontSeg button').forEach((x) => x.classList.toggle('on', x === b));
+  schedule(true); track('title_font', { font: state.font || 'default' });
+});
+function markFont() { $$('#fontSeg button').forEach((x) => x.classList.toggle('on', x.dataset.font === (state.font || ''))); }
+$('#preview').addEventListener('click', (e) => {
+  const cv = $('#preview'); const items = cv._items; if (!items) return;
+  const rect = cv.getBoundingClientRect();
+  const x = (e.clientX - rect.left) * cv.width / rect.width, y = (e.clientY - rect.top) * cv.height / rect.height;
+  const hit = items.find((it) => it.type === 'photo' && !it.user && x >= it.x && x <= it.x + it.w && y >= it.y && y <= it.y + it.h);
+  if (!hit) return;
+  state.swaps = state.swaps || {}; state.swaps[hit.pidx] = (state.swaps[hit.pidx] || 0) + 1;
+  schedule(false); track('photo_swap');
+  const h = $('#swapHint'); if (h) h.classList.add('done');
+});
 
 // ---------- preview ----------
 let previewTimer, rendering = false, pending = false;
@@ -361,7 +381,7 @@ if (CFG.ANALYTICS_SNIPPET_URL) { const s = document.createElement('script'); s.d
   if (params.get('b')) { const sh = decodeBoard(params.get('b')); if (sh) { Object.assign(state, sh); sharedLoaded = true; } }
   const look = params.get('look'); if (look && THEMES.some((t) => t.id === look)) state.themeId = look;
   const pg = params.get('goals'); if (pg) { const cats = new Set(CATEGORIES.map((c) => c.id)); const g = pg.split(',').filter((x) => cats.has(x)).slice(0, 7); if (g.length) state.goals = g; }
-  $('#titleInput').value = state.title;
+  $('#titleInput').value = state.title; markFont();
   $('#wordInput').value = state.word;
   applyI18n(); buildThemeGrid();
   const code = params.get('unlock');

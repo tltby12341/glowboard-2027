@@ -85,6 +85,7 @@
           <button class="btn btn-soft" id="shuffleBtn" type="button"><svg viewBox="0 0 24 24" width="16" height="16"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="shuffle">Shuffle layout</span></button>
           <button class="btn btn-primary" id="downloadBtn" type="button"><svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 3v12m0 0 5-5m-5 5-5-5M4 21h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="download">Download my wallpaper</span></button>
         </div>
+        <p class="swap-hint" id="swapHint">Tip: tap any photo in the preview to swap it</p>
         <button class="link-btn tpl-btn" id="tplBtn" type="button"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Send this board to a friend</button>
       </div>
     </div>
@@ -114,6 +115,14 @@
         <div class="grid2">
           <label class="field"><span data-i18n="title_label">Big title</span><input id="titleInput" maxlength="14" value="2027"></label>
           <label class="field"><span data-i18n="word_label">Word of the year</span><input id="wordInput" maxlength="24"></label>
+        </div>
+        <p class="field-label">Title style</p>
+        <div class="seg font-seg" id="fontSeg" role="group" aria-label="Title style">
+          <button type="button" data-font="" class="on">Look default</button>
+          <button type="button" data-font="serif" style="font-family:'Instrument Serif',serif;font-size:17px">Serif</button>
+          <button type="button" data-font="script" style="font-family:'Pinyon Script',cursive;font-size:18px">Script</button>
+          <button type="button" data-font="bold" style="font-family:Syne,sans-serif;font-weight:800">Bold</button>
+          <button type="button" data-font="hand" style="font-family:Caveat,cursive;font-size:19px">Handwritten</button>
         </div>
         <label class="switch"><input type="checkbox" id="clockToggle" checked><span class="slider"></span><span data-i18n="clock_label">Leave space for the clock</span></label>
         <div class="photos">
