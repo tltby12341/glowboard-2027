@@ -1,4 +1,3 @@
 User-agent: *
 Allow: /
-Disallow: /unlock-helper.html
 Sitemap: https://glowboard.quantworlds.com/sitemap.xml
