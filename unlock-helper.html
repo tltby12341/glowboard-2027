@@ -10,12 +10,12 @@
 <button id="cp">Copy hash</button>
 <p>3. Paste the hash into <b>config.js → UNLOCK_CODE_SHA256</b>.</p>
 <p>4. In Gumroad / Lemon Squeezy / Stripe, set the post-purchase redirect (or put this link in the receipt / thank-you message) to:</p>
-<code id="u">https://tltby12341.github.io/glowboard-2027/?unlock=YOUR_CODE</code>
+<code id="u">https://glowboard.quantworlds.com/?unlock=YOUR_CODE</code>
 <p>The code is never stored on this page or sent anywhere.</p>
 <script>
 const c=document.getElementById('c'),h=document.getElementById('h'),u=document.getElementById('u');
 c.addEventListener('input',async()=>{const v=c.value.trim();if(!v){h.textContent='…';return}
 const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v));h.textContent=[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
-u.textContent='https://tltby12341.github.io/glowboard-2027/?unlock='+encodeURIComponent(v);});
+u.textContent='https://glowboard.quantworlds.com/?unlock='+encodeURIComponent(v);});
 document.getElementById('cp').onclick=()=>navigator.clipboard.writeText(h.textContent);
 </script><script data-goatcounter="https://glowboard.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script></body></html>

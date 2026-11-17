@@ -4,7 +4,7 @@ import { makeZip } from './zip.js';
 import { renderBoard, renderAffirmation, ensureFonts, SIZES, loadManifest, renderChecklist, renderHome, renderWidget, defaultWord } from './render.js';
 
 const CFG = Object.assign({ PRO_PAYMENT_URL: '', PRO_PRICE_LABEL: '$4.99', UNLOCK_CODE_SHA256: '', TIP_URL: '', CONTACT_EMAIL: 'hello@example.com' }, window.GLOWBOARD_CONFIG || {});
-const SITE = 'https://tltby12341.github.io/glowboard-2027/';
+const SITE = 'https://glowboard.quantworlds.com/';
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => Array.from(el.querySelectorAll(s));
 const params = new URLSearchParams(location.search);

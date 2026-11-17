@@ -1,8 +1,8 @@
 # Glowboard: a free 2027 vision board lock screen maker
 
-Live: https://tltby12341.github.io/glowboard-2027/
+Live: https://glowboard.quantworlds.com/
 
-Glowboard is a static site (plain HTML, CSS and JS) hosted on GitHub Pages. Users pick goals and an aesthetic, and the site renders a vision board collage on a canvas sized for an iPhone or Android lock screen. Everything runs in the browser, and user photos never leave the device.
+Glowboard is a static site (plain HTML, CSS and JS) hosted on Cloudflare Pages at [glowboard.quantworlds.com](https://glowboard.quantworlds.com/). The preview URL is `https://glowboard-2027.pages.dev`. Users pick goals and an aesthetic, and the site renders a vision board collage on a canvas sized for an iPhone or Android lock screen. Everything runs in the browser, and user photos never leave the device.
 
 ## Business model
 - **Free:** 3 aesthetics (Clean Girl, Coquette, Old Money) and iPhone/Android PNGs with a small "glowboard · make yours free" watermark. The watermark is the viral loop.
@@ -27,13 +27,34 @@ Glowboard is a static site (plain HTML, CSS and JS) hosted on GitHub Pages. User
    - `UNLOCK_CODE_SHA256`: the hash from step 2
    - `CONTACT_EMAIL`: your email address
 4. In the product settings, set the post-purchase redirect, or put this link in the receipt or thank-you message:
-   `https://tltby12341.github.io/glowboard-2027/?unlock=GLOW-2027-x8k2`
+   `https://glowboard.quantworlds.com/?unlock=GLOW-2027-x8k2`
    Buyers who open that link (or type the code under "Already bought?") are unlocked in their browser.
-5. Commit and push. GitHub Pages redeploys in about 1 minute.
+5. Commit your changes, then deploy:
+
+   ```bash
+   ./scripts/deploy.sh
+   ```
+
+   That uploads the site to Cloudflare Pages. The old GitHub Pages URL (`https://tltby12341.github.io/glowboard-2027/…`) is a redirect to the new domain and keeps the path, query string (`?unlock=…`) and hash.
 
 > Note: this unlock is client-side (honor system). That is fine for a $5 impulse product. Change the code if it leaks. For stronger protection later, use license-key verification (Gumroad and Lemon Squeezy both provide license APIs) behind a small serverless function.
 
 Test Pro without paying: add `?pro=preview` to the URL. Nothing is saved.
+
+
+## Hosting and deploys
+
+- **Live site:** [https://glowboard.quantworlds.com/](https://glowboard.quantworlds.com/) (Cloudflare Pages project `glowboard-2027`, custom domain on `quantworlds.com`).
+- **Source of truth:** the `main` branch. This is the real site. Deploy it with `./scripts/deploy.sh` (requires a logged-in [Wrangler](https://developers.cloudflare.com/workers/wrangler/) CLI). The script copies the site into a temp folder, leaving out `.git`, `node_modules`, `tools` and `scripts`.
+- **Old GitHub Pages URL:** the `gh-pages` branch is a set of lightweight HTML redirects, not the app. GitHub Pages is set to publish that branch. Rebuild the stubs after adding or renaming pages:
+
+  ```bash
+  git checkout gh-pages
+  # or, from a worktree:
+  ./scripts/build-gh-pages-redirects.sh /path/to/gh-pages
+  ```
+
+  Then commit and push `gh-pages`. Do not deploy `gh-pages` to Cloudflare.
 
 ## Analytics (optional)
 Set `ANALYTICS_SNIPPET_URL` (and `ANALYTICS_DOMAIN`) in `config.js` for Plausible or Umami. The app fires events: `download_click`, `download_ok`, `paywall_view` (with `reason`), `paywall_style`, `unlock_click`, `unlocked`, `theme`, `vibe`, `title_font`, `photo_swap`, `more_goals`, `template_share`, `template_open`, `look_open`, `checklist_click`, `checklist_ok`, `home_click`, `home_ok`, `share_native`, `copy_link`, `save_image`, `set_click`, `set_ok`, `gift_pro_click`, `gift_free_click`, `nudge_view`, `nudge_click`, `nudge_dismiss`, `reveal_save`, `reveal_edit`.

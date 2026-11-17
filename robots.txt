@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 Disallow: /unlock-helper.html
-Sitemap: https://tltby12341.github.io/glowboard-2027/sitemap.xml
+Sitemap: https://glowboard.quantworlds.com/sitemap.xml
