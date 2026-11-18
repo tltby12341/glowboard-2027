@@ -330,7 +330,7 @@ export function buildItems(state, manifest, lang) {
   const photoItems = uniq.slice(0, (state.userPhotos||[]).length ? 8 : 7);
 
   const texts = [];
-  (state.custom || []).forEach((c) => c.trim() && texts.push({ type: 'text', text: c.trim(), label: true }));
+  (state.custom || []).forEach((c, idx) => c.trim() && texts.push({ type: 'text', text: c.trim(), label: true, customIdx: idx }));
   const affs = [];
   goals.forEach((g) => { const arr = AFFIRMATIONS[g]?.[lang] || []; if (arr.length) affs.push(arr[Math.floor(r() * arr.length)]); });
   for (let i = affs.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [affs[i], affs[j]] = [affs[j], affs[i]]; }
@@ -338,6 +338,8 @@ export function buildItems(state, manifest, lang) {
   const textCount = Math.min(texts.length, 3);
   return { photos: photoItems, texts: texts.slice(0, textCount) };
 }
+
+export const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 // ---------- main render ----------
 const TITLE_FONTS = {
@@ -358,9 +360,26 @@ function swapPhotos(photos, swaps, manifest) {
     p.src = pool[(at + n) % pool.length]; p.img = null;
   });
 }
+function swapQuotes(texts, quoteSwaps, goals, lang) {
+  if (!quoteSwaps) return;
+  const own = (goals || []).flatMap((g) => AFFIRMATIONS[g]?.[lang] || []);
+  const all = Object.values(AFFIRMATIONS).flatMap((v) => v[lang] || []);
+  const fullPool = [...new Set([...own, ...all])];
+  if (!fullPool.length) return;
+  Object.entries(quoteSwaps).forEach(([k, n]) => {
+    const i = +k, item = texts[i]; if (!item || item.label || !n) return;
+    const used = new Set(texts.map((q) => q.text));
+    const pool = fullPool.filter((s) => s === item.text || !used.has(s));
+    if (!pool.length) return;
+    const at = Math.max(0, pool.indexOf(item.text));
+    item.text = pool[(at + n) % pool.length];
+  });
+}
 export async function renderBoard(canvas, state, opts = {}) {
   const manifest = await loadManifest();
   const lang = state.lang || 'en';
+  const layout = state.layout || 'collage';
+  const stamp = state.stamp || '';
   let t = themeById(state.themeId);
   if (state.font && TITLE_FONTS[state.font]) t = { ...t, ...TITLE_FONTS[state.font] };
   const W = opts.width || canvas.width, H = opts.height || canvas.height;
@@ -373,6 +392,7 @@ export async function renderBoard(canvas, state, opts = {}) {
 
   const { photos, texts } = buildItems(state, manifest, lang);
   swapPhotos(photos, state.swaps, manifest);
+  swapQuotes(texts, state.quoteSwaps, state.goals, lang);
   // previews, thumbs and hero phones use a lighter 480px photo set; real exports keep full-res photos
   const small = Math.max(W, H) <= 1800;
   await Promise.all(photos.map(async (p) => { if (!p.img && p.src) p.img = await loadImage(small ? smallSrc(p.src) : p.src); }));
@@ -382,43 +402,93 @@ export async function renderBoard(canvas, state, opts = {}) {
   drawBackground(ctx, t, W, H, r);
 
   // regions
-  let titleBox, collage;
+  let titleBox, collage, calBox = null;
   const isPrint = opts.kind === 'print';
+  const isStory = opts.kind === 'story';
+  const isCard = opts.kind === 'card';
+  const isIpad = opts.kind === 'ipad';
   if (landscape) {
-    titleBox = { x: W * 0.05, y: H * 0.1, w: W * 0.27, h: H * 0.8 };
-    collage = { x: W * 0.35, y: H * 0.07, w: W * 0.6, h: H * 0.86 };
+    if (layout === 'calendar') {
+      titleBox = { x: W * 0.05, y: H * 0.08, w: W * 0.28, h: H * 0.34 };
+      calBox = { x: W * 0.05, y: H * 0.45, w: W * 0.28, h: H * 0.47 };
+      collage = { x: W * 0.36, y: H * 0.07, w: W * 0.59, h: H * 0.86 };
+    } else {
+      titleBox = { x: W * 0.05, y: H * 0.1, w: W * 0.27, h: H * 0.8 };
+      collage = { x: W * 0.35, y: H * 0.07, w: W * 0.6, h: H * 0.86 };
+    }
   } else {
-    const isStory = opts.kind === 'story';
-    const isIpad = opts.kind === 'ipad';
-    const top = state.clockSafe && !isPrint && !isStory ? H * (isIpad ? 0.22 : 0.285) : H * (isStory ? 0.075 : 0.055);
-    const th = H * (isPrint ? 0.14 : 0.13);
+    const noClock = isPrint || isStory || isCard;
+    const top = state.clockSafe && !noClock ? H * (isIpad ? 0.215 : 0.28) : H * (isStory ? 0.072 : isCard ? 0.062 : 0.055);
+    const th = H * (layout === 'calendar' ? 0.108 : isPrint ? 0.14 : 0.13);
     titleBox = { x: W * 0.06, y: top, w: W * 0.88, h: th };
-    const bottom = isPrint ? H * 0.95 : H * 0.915;
-    collage = { x: W * 0.055, y: top + th + u * 2, w: W * 0.89, h: bottom - (top + th + u * 2) };
+    const bottom = isPrint || isCard ? H * 0.95 : H * 0.918;
+    const fullH = bottom - (top + th + u * 2);
+    if (layout === 'calendar') {
+      const calH = Math.min(fullH * 0.34, W * 0.56);
+      collage = { x: W * 0.055, y: top + th + u * 1.6, w: W * 0.89, h: fullH - calH - u * 1.8 };
+      calBox = { x: W * 0.055, y: collage.y + collage.h + u * 1.8, w: W * 0.89, h: calH };
+    } else {
+      collage = { x: W * 0.055, y: top + th + u * 2, w: W * 0.89, h: fullH };
+    }
   }
 
-  const total = photos.length + texts.length;
-  const cells = splitCells(collage, total, r, u * 17);
-  // assign text cards to the smallest / widest cells
-  const order = cells.map((c, i) => { const a = c.w / c.h; return { c, i, score: c.w * c.h * (a < 0.62 ? 3.5 : a > 1.15 ? 0.75 : 1) + r() * u * u * 40 }; })
-    .sort((a, b) => a.score - b.score);
-  const textIdx = new Set(order.slice(0, texts.length).map((o) => o.i));
-  const items = []; let pi = 0, ti = 0;
-  cells.forEach((c, i) => {
-    if (textIdx.has(i)) items.push({ ...texts[ti++], cell: c });
-    else { items.push({ ...photos[pi], pidx: pi, cell: c }); pi++; }
-  });
-
   const gap = t.gap * u;
-  const scrap = t.rotate > 0;
+  const items = [];
+  let cells = [];
+
+  if (layout === 'editorial') {
+    // Magazine cover layout: commanding hero photo + pull-quote strip + 3-frame curated filmstrip
+    const heroPhotos = photos.slice(0, 4);
+    const mainQuote = texts[0] || { type: 'text', text: state.word || '2027' };
+    if (landscape) {
+      const heroW = collage.w * 0.62, sideW = collage.w - heroW;
+      const qH = mainQuote ? collage.h * 0.2 : 0;
+      const hCell = { x: collage.x, y: collage.y, w: heroW, h: collage.h - qH };
+      items.push({ ...heroPhotos[0], pidx: 0, cell: hCell });
+      if (mainQuote) items.push({ ...mainQuote, tidx: 0, cell: { x: collage.x, y: collage.y + collage.h - qH, w: heroW, h: qH } });
+      const subCount = Math.max(1, heroPhotos.length - 1);
+      const sh = collage.h / subCount;
+      for (let k = 1; k < heroPhotos.length; k++) {
+        items.push({ ...heroPhotos[k], pidx: k, cell: { x: collage.x + heroW, y: collage.y + (k - 1) * sh, w: sideW, h: sh } });
+      }
+    } else {
+      const heroH = collage.h * 0.55;
+      const quoteH = collage.h * 0.145;
+      const stripH = collage.h - heroH - quoteH;
+      items.push({ ...heroPhotos[0], pidx: 0, cell: { x: collage.x, y: collage.y, w: collage.w, h: heroH } });
+      items.push({ ...mainQuote, tidx: 0, cell: { x: collage.x, y: collage.y + heroH, w: collage.w, h: quoteH } });
+      const sub = heroPhotos.slice(1, 4);
+      const sw = collage.w / Math.max(1, sub.length);
+      sub.forEach((p, idx) => {
+        items.push({ ...p, pidx: idx + 1, cell: { x: collage.x + idx * sw, y: collage.y + heroH + quoteH, w: sw, h: stripH } });
+      });
+    }
+    cells = items.map((it) => it.cell);
+  } else {
+    const usePhotos = layout === 'calendar' ? photos.slice(0, landscape ? 6 : 4) : photos;
+    const useTexts = layout === 'calendar' ? texts.slice(0, 1) : texts;
+    const total = usePhotos.length + useTexts.length;
+    cells = splitCells(collage, total, r, u * (layout === 'calendar' ? 14 : 17));
+    // assign text cards to the smallest / widest cells
+    const order = cells.map((c, i) => { const a = c.w / c.h; return { c, i, score: c.w * c.h * (a < 0.62 ? 3.5 : a > 1.15 ? 0.75 : 1) + r() * u * u * 40 }; })
+      .sort((a, b) => a.score - b.score);
+    const textIdx = new Set(order.slice(0, useTexts.length).map((o) => o.i));
+    let pi = 0, ti = 0;
+    cells.forEach((c, i) => {
+      if (textIdx.has(i)) { items.push({ ...useTexts[ti], tidx: ti, cell: c }); ti++; }
+      else { items.push({ ...usePhotos[pi], pidx: pi, cell: c }); pi++; }
+    });
+  }
+
+  const scrap = t.rotate > 0 && layout !== 'editorial';
   const drawOrder = scrap ? items.slice().sort(() => r() - 0.5) : items;
-  canvas._items = items.map((it) => ({ type: it.type, pidx: it.pidx, user: !!it.user, x: it.cell.x, y: it.cell.y, w: it.cell.w, h: it.cell.h }));
+  canvas._items = items.map((it) => ({ type: it.type, pidx: it.pidx, tidx: it.tidx, label: !!it.label, user: !!it.user, x: it.cell.x, y: it.cell.y, w: it.cell.w, h: it.cell.h }));
   for (const it of drawOrder) {
     const c = it.cell;
     let x = c.x + gap / 2, y = c.y + gap / 2, w = c.w - gap, h = c.h - gap;
     let rot = 0;
     if (scrap) {
-      const grow = 1.06; const nw = w * grow, nh = h * grow; x -= (nw - w) / 2; y -= (nh - h) / 2; w = nw; h = nh;
+      const grow = 1.05; const nw = w * grow, nh = h * grow; x -= (nw - w) / 2; y -= (nh - h) / 2; w = nw; h = nh;
       rot = (r() - 0.5) * 2 * t.rotate * Math.PI / 180;
     }
     ctx.save();
@@ -428,10 +498,18 @@ export async function renderBoard(canvas, state, opts = {}) {
     ctx.restore();
   }
 
-  drawTitle(ctx, t, state, titleBox, u, lang, landscape);
+  if (calBox) {
+    const calMonth = Number.isFinite(+state.calMonth) ? Math.max(0, Math.min(11, +state.calMonth)) : 0;
+    ctx.save();
+    ctx.translate(calBox.x + gap / 2, calBox.y + gap / 2);
+    drawCalendarCard(ctx, t, calMonth, calBox.w - gap, calBox.h - gap, u);
+    ctx.restore();
+  }
 
-  // stickers
-  const n = t.stickerCount + (landscape ? 2 : 0);
+  drawTitle(ctx, t, state, titleBox, u, lang, landscape, layout === 'editorial');
+
+  // stickers & signature stamps
+  const n = stamp === 'none' ? 0 : Math.max(0, t.stickerCount - (layout === 'editorial' ? 2 : 0)) + (landscape ? 2 : 0);
   for (let i = 0; i < n; i++) {
     const kind = t.stickers[Math.floor(r() * t.stickers.length)];
     const color = t.stickerColors[Math.floor(r() * t.stickerColors.length)];
@@ -449,6 +527,8 @@ export async function renderBoard(canvas, state, opts = {}) {
     sticker(ctx, kind, sx, sy, size, color, (r() - 0.5) * 0.6);
     ctx.restore();
   }
+
+  if (stamp && stamp !== 'none') drawSignatureStamp(ctx, t, state, collage, cells, u);
 
   drawGrain(ctx, t, W, H);
   if (opts.watermark) drawWatermark(ctx, t, W, H, u, landscape);
@@ -617,7 +697,137 @@ function drawTextCard(ctx, t, it, w, h, u, lang, r) {
   lines.forEach((l, i) => ctx.fillText(l, w / 2, y0 + i * lh));
 }
 
-function drawTitle(ctx, t, state, box, u, lang, landscape) {
+function drawCalendarCard(ctx, t, monthIdx, w, h, u) {
+  const m = Math.max(0, Math.min(11, monthIdx || 0));
+  const rad = (t.frame === 'square' ? 0 : Math.max(t.radius, 1.4)) * u;
+  shadowOn(ctx, t, u, 0.85);
+  ctx.fillStyle = t.card; rr(ctx, 0, 0, w, h, rad); ctx.fill(); shadowOff(ctx);
+  if (t.cardStroke) {
+    ctx.strokeStyle = t.cardStroke; ctx.lineWidth = u * 0.24;
+    rr(ctx, u * 0.7, u * 0.7, w - u * 1.4, h - u * 1.4, Math.max(0, rad - u * 0.4)); ctx.stroke();
+  }
+  const padX = w * 0.065;
+  const colW = (w - padX * 2) / 7;
+  ctx.fillStyle = t.cardInk; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const headFs = Math.min(h * 0.105, w * 0.05);
+  ctx.font = fontStr(headFs, '"Inter", "PingFang SC", sans-serif', { weight: 700 });
+  drawTracked(ctx, `${MONTH_NAMES[m].toUpperCase()}  ·  2027`, w / 2, h * 0.155, 0.22, headFs);
+
+  ctx.save(); ctx.globalAlpha = 0.14; ctx.strokeStyle = t.cardInk; ctx.lineWidth = Math.max(1, u * 0.14);
+  ctx.beginPath(); ctx.moveTo(padX, h * 0.255); ctx.lineTo(w - padX, h * 0.255); ctx.stroke(); ctx.restore();
+
+  const dows = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+  const dowFs = Math.min(h * 0.072, colW * 0.34);
+  ctx.font = fontStr(dowFs, '"Inter", sans-serif', { weight: 700 });
+  ctx.globalAlpha = 0.52;
+  dows.forEach((d, i) => ctx.fillText(d, padX + colW * (i + 0.5), h * 0.34));
+  ctx.globalAlpha = 1;
+
+  const firstDow = new Date(2027, m, 1).getDay();
+  const daysInMonth = new Date(2027, m + 1, 0).getDate();
+  const weeks = Math.ceil((firstDow + daysInMonth) / 7);
+  const gridTop = h * 0.425;
+  const rowH = (h * 0.505) / weeks;
+  const dayFs = Math.min(rowH * 0.62, colW * 0.38);
+  ctx.font = fontStr(dayFs, '"Inter", sans-serif', { weight: 600 });
+  for (let d = 1; d <= daysInMonth; d++) {
+    const idx = firstDow + d - 1;
+    const col = idx % 7, row = Math.floor(idx / 7);
+    const cx = padX + colW * (col + 0.5), cy = gridTop + rowH * (row + 0.5);
+    if (d === 1) {
+      ctx.save(); ctx.globalAlpha = 0.12; ctx.fillStyle = t.cardInk;
+      ctx.beginPath(); ctx.arc(cx, cy, Math.min(colW, rowH) * 0.38, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+      ctx.fillStyle = t.cardInk;
+    }
+    ctx.globalAlpha = (col === 0 || col === 6) ? 0.68 : 0.94;
+    ctx.fillText(String(d), cx, cy + dayFs * 0.04);
+  }
+  ctx.globalAlpha = 1;
+}
+
+function drawSignatureStamp(ctx, t, state, collage, cells, u) {
+  const stamp = state.stamp;
+  const c0 = cells[0] || collage;
+  ctx.save();
+  if (stamp === 'angel') {
+    const sets = [['11:11', 'ALIGNED'], ['777', 'LUCKY ERA'], ['222', 'IN FLOW'], ['444', 'PROTECTED']];
+    const [num, sub] = sets[(state.seed || 1) % sets.length];
+    const bw = u * 21, bh = u * 8.4;
+    const cx = collage.x + collage.w - bw * 0.54, cy = collage.y + bh * 0.62;
+    ctx.translate(cx, cy); ctx.rotate(0.055);
+    ctx.shadowColor = 'rgba(0,0,0,0.22)'; ctx.shadowBlur = u * 1.8; ctx.shadowOffsetY = u * 0.5;
+    ctx.fillStyle = t.card.startsWith('rgba') ? '#FFFDF9' : t.card;
+    rr(ctx, -bw / 2, -bh / 2, bw, bh, bh / 2); ctx.fill();
+    shadowOff(ctx);
+    ctx.strokeStyle = t.cardStroke || t.accent; ctx.lineWidth = u * 0.26;
+    rr(ctx, -bw / 2 + u * 0.65, -bh / 2 + u * 0.65, bw - u * 1.3, bh - u * 1.3, bh / 2 - u * 0.5); ctx.stroke();
+    ctx.fillStyle = t.cardInk; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = fontStr(u * 3.4, '"Instrument Serif", serif', { italic: true });
+    ctx.fillText(`✦ ${num} ✦`, 0, -u * 0.85);
+    ctx.globalAlpha = 0.72;
+    ctx.font = fontStr(u * 1.35, '"Inter", sans-serif', { weight: 700 });
+    drawTracked(ctx, sub, 0, u * 2.05, 0.24, u * 1.35);
+  } else if (stamp === 'seal') {
+    const sr = u * 6.2;
+    const cx = Math.min(collage.x + collage.w - sr * 1.15, c0.x + c0.w - sr * 0.85);
+    const cy = Math.min(collage.y + collage.h - sr * 1.15, c0.y + c0.h - sr * 0.65);
+    ctx.translate(cx, cy); ctx.rotate(-0.08);
+    ctx.shadowColor = 'rgba(30,18,5,0.38)'; ctx.shadowBlur = u * 2.2; ctx.shadowOffsetY = u * 0.75;
+    ctx.beginPath();
+    for (let i = 0; i <= 64; i++) {
+      const a = (i / 64) * Math.PI * 2;
+      const rad = sr + Math.sin(a * 9) * u * 0.34 + Math.cos(a * 5) * u * 0.22;
+      const px = Math.cos(a) * rad, py = Math.sin(a) * rad;
+      i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    const wg = ctx.createRadialGradient(-sr * 0.32, -sr * 0.32, sr * 0.1, 0, 0, sr * 1.1);
+    wg.addColorStop(0, '#FCF0D2'); wg.addColorStop(0.48, '#D5AA5E'); wg.addColorStop(1, '#8A601E');
+    ctx.fillStyle = wg; ctx.fill();
+    shadowOff(ctx);
+    ctx.strokeStyle = 'rgba(92,58,12,0.48)'; ctx.lineWidth = u * 0.32;
+    ctx.beginPath(); ctx.arc(0, 0, sr * 0.74, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,250,232,0.55)'; ctx.lineWidth = u * 0.18;
+    ctx.beginPath(); ctx.arc(0, 0, sr * 0.78, -Math.PI * 0.85, -Math.PI * 0.15); ctx.stroke();
+    ctx.fillStyle = '#5B3B0C'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    sticker(ctx, 'star4', 0, -sr * 0.3, sr * 0.2, '#5B3B0C');
+    ctx.font = fontStr(sr * 0.36, '"Instrument Serif", serif', { weight: 700 });
+    ctx.fillText('2027', 0, sr * 0.08);
+    ctx.font = fontStr(sr * 0.15, '"Inter", sans-serif', { weight: 800 });
+    drawTracked(ctx, 'GLOW', 0, sr * 0.42, 0.26, sr * 0.15);
+  } else if (stamp === 'postmark') {
+    const pr = u * 5.6;
+    const cx = collage.x + collage.w - pr * 2.5, cy = collage.y + pr * 1.35;
+    ctx.translate(cx, cy); ctx.rotate(-0.18);
+    const darkBg = ['oldmoney', 'darkluxe', 'mobwife', 'cozywinter', 'academia', 'film', 'celestial'].includes(t.id);
+    const ink = darkBg ? 'rgba(235,205,145,0.84)' : 'rgba(62,42,32,0.74)';
+    ctx.strokeStyle = ink; ctx.fillStyle = ink;
+    ctx.lineWidth = u * 0.26;
+    ctx.beginPath(); ctx.arc(0, 0, pr, 0, Math.PI * 2); ctx.stroke();
+    ctx.lineWidth = u * 0.16;
+    ctx.beginPath(); ctx.arc(0, 0, pr * 0.72, 0, Math.PI * 2); ctx.stroke();
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = fontStr(pr * 0.21, '"Inter", sans-serif', { weight: 700 });
+    drawTracked(ctx, 'MANIFEST', 0, -pr * 0.4, 0.16, pr * 0.21);
+    ctx.font = fontStr(pr * 0.38, '"Instrument Serif", serif', { italic: true });
+    ctx.fillText('2027', 0, pr * 0.02);
+    ctx.font = fontStr(pr * 0.18, '"Inter", sans-serif', { weight: 700 });
+    drawTracked(ctx, 'APPROVED', 0, pr * 0.42, 0.14, pr * 0.18);
+    ctx.lineWidth = u * 0.22;
+    for (let row = -1.5; row <= 1.5; row += 1) {
+      ctx.beginPath();
+      const y0 = row * pr * 0.28;
+      for (let x = pr * 1.1; x <= pr * 2.85; x += u * 0.4) {
+        const wy = y0 + Math.sin((x / u) * 1.5) * u * 0.38;
+        x === pr * 1.1 ? ctx.moveTo(x, wy) : ctx.lineTo(x, wy);
+      }
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
+function drawTitle(ctx, t, state, box, u, lang, landscape, editorial = false) {
   const title = (state.title || '2027').slice(0, 14);
   const word = (state.word || '').slice(0, 24);
   ctx.save();
@@ -633,7 +843,11 @@ function drawTitle(ctx, t, state, box, u, lang, landscape) {
   // label
   ctx.font = fontStr(u * (landscape ? 2.6 : 2.2), t.labelFont === '"Caveat", "Kaiti SC", cursive' ? '"Inter", sans-serif' : t.labelFont, { weight: 600 });
   ctx.fillStyle = t.ink; ctx.globalAlpha = 0.75;
-  drawTracked(ctx, 'VISION BOARD', cx, baseY - size * 0.86, 0.32, u * 2.2);
+  drawTracked(ctx, editorial ? 'ISSUE NO. 27 · VISION EDITION' : 'VISION BOARD', cx, baseY - size * 0.86, editorial ? 0.26 : 0.32, u * 2.2);
+  if (editorial && !landscape) {
+    ctx.globalAlpha = 0.22; ctx.strokeStyle = t.ink; ctx.lineWidth = Math.max(1, u * 0.16);
+    ctx.beginPath(); ctx.moveTo(box.x, box.y + box.h - u * 0.4); ctx.lineTo(box.x + box.w, box.y + box.h - u * 0.4); ctx.stroke();
+  }
   ctx.globalAlpha = 1;
   ctx.font = fontStr(size, t.titleFont, fo);
   if (t.titleGold) {
@@ -669,7 +883,7 @@ function drawWatermark(ctx, t, W, H, u, landscape) {
   ctx.font = fontStr(s, '"Inter", sans-serif', { weight: 600 });
   const tw = ctx.measureText(text).width;
   const x = W / 2, y = landscape ? H - u * 3 : H - H * 0.042;
-  const dark = ['oldmoney', 'darkluxe'].includes(t.id);
+  const dark = ['oldmoney', 'darkluxe', 'mobwife', 'cozywinter', 'academia', 'film', 'celestial'].includes(t.id);
   ctx.fillStyle = dark ? 'rgba(0,0,0,0.38)' : 'rgba(255,255,255,0.62)';
   rr(ctx, x - tw / 2 - s * 0.9, y - s * 0.95, tw + s * 1.8, s * 1.9, s); ctx.fill();
   ctx.fillStyle = dark ? 'rgba(255,255,255,0.85)' : 'rgba(30,25,22,0.75)';
@@ -709,10 +923,11 @@ export async function ensureFonts() {
 export const SIZES = {
   iphone: { w: 1179, h: 2556, pro: false },
   android: { w: 1080, h: 2400, pro: false },
-  desktop: { w: 3840, h: 2160, pro: true },
-  print: { w: 2480, h: 3508, pro: true, kind: 'print' },
   story: { w: 1080, h: 1920, pro: false, kind: 'story' },
+  card: { w: 1080, h: 1440, pro: false, kind: 'card' },
+  desktop: { w: 3840, h: 2160, pro: true },
   ipad: { w: 2048, h: 2732, pro: true, kind: 'ipad' },
+  print: { w: 2480, h: 3508, pro: true, kind: 'print' },
 };
 
 export function defaultWord(lang, seed) { const arr = WORDS[lang] || WORDS.en; return arr[seed % arr.length]; }
@@ -731,7 +946,8 @@ export async function renderChecklist(canvas, state, W = 2480, H = 3508) {
   // photo strip
   const { photos } = buildItems(state, manifest, 'en'); swapPhotos(photos, state.swaps, manifest);
   const strip = photos.slice(0, 4);
-  await Promise.all(strip.map(async (p) => { if (!p.img && p.src) p.img = await loadImage(p.src); }));
+  const small = Math.max(W, H) <= 1800;
+  await Promise.all(strip.map(async (p) => { if (!p.img && p.src) p.img = await loadImage(small ? smallSrc(p.src) : p.src); }));
   const sy = M, sh = 24 * u, gap = 1.6 * u, sw = (W - 2 * M - gap * 3) / 4;
   strip.forEach((p, i) => { const x = M + i * (sw + gap); ctx.save(); rr(ctx, x, sy, sw, sh, 2 * u); ctx.clip(); if (p.img) drawCover(ctx, p.img, x, sy, sw, sh); else { ctx.fillStyle = '#EFE7DC'; ctx.fillRect(x, sy, sw, sh); } ctx.restore(); });
   // title

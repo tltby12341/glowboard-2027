@@ -1,9 +1,9 @@
 import { CATEGORIES, STRINGS, WORDS, AFFIRMATIONS } from './data.js';
 import { THEMES, themeById } from './themes.js';
 import { makeZip } from './zip.js';
-import { renderBoard, renderAffirmation, ensureFonts, SIZES, loadManifest, renderChecklist, renderHome, renderWidget, defaultWord } from './render.js';
+import { renderBoard, renderAffirmation, ensureFonts, SIZES, loadManifest, renderChecklist, renderHome, renderWidget, defaultWord, MONTH_NAMES } from './render.js';
 
-const CFG = Object.assign({ PRO_PAYMENT_URL: '', PRO_PRICE_LABEL: '$4.99', UNLOCK_CODE_SHA256: '', TIP_URL: '', CONTACT_EMAIL: 'hello@example.com' }, window.GLOWBOARD_CONFIG || {});
+const CFG = Object.assign({ PRO_PAYMENT_URL: '', PRO_PRICE_LABEL: '$1.99', PRO_COMPARE_PRICE: '$5.99', UNLOCK_CODE_SHA256: '', TIP_URL: '', CONTACT_EMAIL: 'hello@example.com' }, window.GLOWBOARD_CONFIG || {});
 const SITE = 'https://glowboard.quantworlds.com/';
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => Array.from(el.querySelectorAll(s));
@@ -13,20 +13,47 @@ const previewPro = params.get('pro') === 'preview';
 // ---------- shareable template links ----------
 function b64u(s) { return btoa(String.fromCharCode(...new TextEncoder().encode(s))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
 function unb64u(s) { const b = atob(s.replace(/-/g, '+').replace(/_/g, '/')); return new TextDecoder().decode(Uint8Array.from(b, (c) => c.charCodeAt(0))); }
-function encodeBoard() { return b64u(JSON.stringify({ g: state.goals, t: state.themeId, ti: state.title, w: state.word, c: state.custom, s: state.seed, f: state.font || undefined, sw: Object.keys(state.swaps || {}).length ? state.swaps : undefined })); }
+function encodeBoard() {
+  return b64u(JSON.stringify({
+    g: state.goals, t: state.themeId, ti: state.title, w: state.word, c: state.custom, s: state.seed,
+    f: state.font || undefined,
+    ly: state.layout && state.layout !== 'collage' ? state.layout : undefined,
+    cm: state.layout === 'calendar' ? state.calMonth : undefined,
+    st: state.stamp || undefined,
+    sw: Object.keys(state.swaps || {}).length ? state.swaps : undefined,
+    qs: Object.keys(state.quoteSwaps || {}).length ? state.quoteSwaps : undefined,
+  }));
+}
+function sanitizeBoard(o) {
+  if (!o || typeof o !== 'object') return null;
+  const cats = new Set(CATEGORIES.map((c) => c.id));
+  const out = {};
+  if (Array.isArray(o.g)) { const g = o.g.filter((x) => cats.has(x)).slice(0, 7); if (g.length) out.goals = g; }
+  if (THEMES.some((t) => t.id === o.t)) out.themeId = o.t;
+  if (typeof o.ti === 'string') out.title = o.ti.slice(0, 24);
+  if (typeof o.w === 'string') out.word = o.w.slice(0, 24);
+  if (Array.isArray(o.c)) out.custom = o.c.filter((x) => typeof x === 'string').map((x) => x.slice(0, 60)).slice(0, 6);
+  if (['', 'serif', 'script', 'bold', 'hand'].includes(o.f)) out.font = o.f;
+  if (['collage', 'editorial', 'calendar'].includes(o.ly)) out.layout = o.ly;
+  if (Number.isFinite(o.cm)) out.calMonth = Math.max(0, Math.min(11, Math.floor(o.cm)));
+  if (['', 'none', 'angel', 'seal', 'postmark'].includes(o.st)) out.stamp = o.st;
+  if (typeof o.ck === 'boolean') out.clockSafe = o.ck;
+  if (o.sz && SIZES[o.sz]) out.size = o.sz;
+  if (o.sw && typeof o.sw === 'object') { const sw = {}; Object.entries(o.sw).slice(0, 10).forEach(([k, v]) => { if (/^\d$/.test(k) && Number.isFinite(v)) sw[k] = Math.abs(Math.floor(v)) % 100; }); out.swaps = sw; }
+  if (o.qs && typeof o.qs === 'object') { const qs = {}; Object.entries(o.qs).slice(0, 6).forEach(([k, v]) => { if (/^\d$/.test(k) && Number.isFinite(v)) qs[k] = Math.abs(Math.floor(v)) % 100; }); out.quoteSwaps = qs; }
+  if (Number.isFinite(o.s)) out.seed = Math.abs(Math.floor(o.s)) % 1e7 || 1;
+  return out;
+}
 function decodeBoard(s) {
-  try {
-    const o = JSON.parse(unb64u(s)); const cats = new Set(CATEGORIES.map((c) => c.id)); const out = {};
-    if (Array.isArray(o.g)) { const g = o.g.filter((x) => cats.has(x)).slice(0, 7); if (g.length) out.goals = g; }
-    if (THEMES.some((t) => t.id === o.t)) out.themeId = o.t;
-    if (typeof o.ti === 'string') out.title = o.ti.slice(0, 24);
-    if (typeof o.w === 'string') out.word = o.w.slice(0, 24);
-    if (Array.isArray(o.c)) out.custom = o.c.filter((x) => typeof x === 'string').map((x) => x.slice(0, 60)).slice(0, 6);
-    if (['serif', 'script', 'bold', 'hand'].includes(o.f)) out.font = o.f;
-    if (o.sw && typeof o.sw === 'object') { const sw = {}; Object.entries(o.sw).slice(0, 10).forEach(([k, v]) => { if (/^\d$/.test(k) && Number.isFinite(v)) sw[k] = Math.abs(Math.floor(v)) % 100; }); out.swaps = sw; }
-    if (Number.isFinite(o.s)) out.seed = Math.abs(Math.floor(o.s)) % 1e7 || 1;
-    return out;
-  } catch (e) { return null; }
+  try { return sanitizeBoard(JSON.parse(unb64u(s))); } catch (e) { return null; }
+}
+function serializeBoard() {
+  return {
+    g: state.goals.slice(), t: state.themeId, ti: state.title, w: state.word, c: state.custom.slice(),
+    s: state.seed, f: state.font || '', ly: state.layout || 'collage', cm: state.calMonth || 0,
+    st: state.stamp || '', ck: !!state.clockSafe, sz: state.size || 'iphone',
+    sw: { ...(state.swaps || {}) }, qs: { ...(state.quoteSwaps || {}) },
+  };
 }
 function templateLink() { return SITE + '?b=' + encodeBoard() + '#make'; }
 
@@ -56,11 +83,17 @@ const state = {
   word: '',
   clockSafe: true,
   font: '',
+  layout: 'collage',
+  calMonth: 0,
+  stamp: '',
   swaps: {},
+  quoteSwaps: {},
   userPhotos: [],
   seed: Math.floor(Math.random() * 1e6) + 1,
   size: 'iphone',
 };
+let previewMode = 'lock'; // 'lock' | 'home' | 'checklist'
+let activeSavedId = null;
 state.word = WORDS[state.lang][0];
 // storage can be disabled (private modes, in-app browsers, strict settings): never let it break the app
 const store = {
@@ -70,6 +103,23 @@ const store = {
 };
 let isPro = previewPro || store.get('gb_pro') === '1';
 const T = (k) => (STRINGS[state.lang] && STRINGS[state.lang][k]) ?? STRINGS.en[k] ?? k;
+
+function saveDraft() {
+  try { store.set('gb_draft', JSON.stringify(serializeBoard())); } catch (e) {}
+}
+function loadDraft() {
+  try { const raw = store.get('gb_draft'); return raw ? sanitizeBoard(JSON.parse(raw)) : null; } catch (e) { return null; }
+}
+function getSavedBoards() {
+  try {
+    const raw = store.get('gb_boards');
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr.filter((x) => x && x.id && x.data) : [];
+  } catch (e) { return []; }
+}
+function setSavedBoards(arr) {
+  try { store.set('gb_boards', JSON.stringify(arr)); } catch (e) {}
+}
 
 function track(name, props) { try { window.plausible && window.plausible(name, { props }); window.umami && window.umami.track(name, props); } catch (e) {} }
 
@@ -103,6 +153,7 @@ function applyI18n() {
   $$('[data-i18n]').forEach((el) => { const v = T(el.dataset.i18n); if (typeof v === 'string') el.textContent = v; });
   $$('[data-i18n-ph]').forEach((el) => { el.placeholder = T(el.dataset.i18nPh); });
   $$('.pro-price').forEach((el) => (el.textContent = CFG.PRO_PRICE_LABEL));
+  $$('.cmp-price').forEach((el) => { el.textContent = CFG.PRO_COMPARE_PRICE || ''; el.hidden = !CFG.PRO_COMPARE_PRICE; });
   const faq = T('faq');
   $('#faqList').innerHTML = faq.map(([q, a]) => `<details><summary>${q}</summary><p>${a}</p></details>`).join('');
   const d = new Date(2027, 0, 1);
@@ -211,10 +262,131 @@ new IntersectionObserver((ents, obs) => {
   if (ents.some((e) => e.isIntersecting)) { thumbsVisible = true; obs.disconnect(); if (thumbsDirty) renderThumbs(); }
 }, { rootMargin: '600px 0px' }).observe($('#themeGrid'));
 
+// ---------- saved boards ----------
+function renderSavedBoards() {
+  const boards = getSavedBoards();
+  const meta = $('#savedMeta');
+  if (meta) meta.textContent = isPro ? `Auto-saved · ${boards.length} saved` : (boards.length ? 'Auto-saved · 1/1 free slot used' : 'Auto-saved · 1 free slot');
+  const list = $('#savedList');
+  if (!list) return;
+  list.hidden = !boards.length;
+  list.innerHTML = boards.map((b) => {
+    const th = themeById(b.data && b.data.t);
+    const dot = th ? th.accent : '#C8A26B';
+    return `<span class="saved-chip ${b.id === activeSavedId ? 'on' : ''}" data-sid="${escapeHtml(b.id)}"><i class="dot" style="background:${dot}"></i><button type="button" class="load">${escapeHtml(b.name || '2027')}</button><button type="button" class="del" aria-label="Delete saved board">×</button></span>`;
+  }).join('');
+}
+$('#saveBoardBtn').addEventListener('click', () => {
+  const boards = getSavedBoards();
+  if (!isPro && boards.length >= 1) {
+    openPay('saved_boards');
+    return;
+  }
+  const th = themeById(state.themeId);
+  const name = `${(state.title || '2027').trim().slice(0, 12)} · ${th.name}`;
+  const id = 'b' + Date.now().toString(36);
+  boards.unshift({ id, name, data: serializeBoard() });
+  if (boards.length > 12) boards.length = 12;
+  activeSavedId = id;
+  setSavedBoards(boards);
+  renderSavedBoards();
+  toast('Saved to My boards ✨');
+  track('board_save', { pro: isPro, count: boards.length });
+});
+$('#savedList').addEventListener('click', (e) => {
+  const chip = e.target.closest('[data-sid]'); if (!chip) return;
+  const id = chip.dataset.sid;
+  let boards = getSavedBoards();
+  if (e.target.closest('.del')) {
+    boards = boards.filter((x) => x.id !== id);
+    if (activeSavedId === id) activeSavedId = null;
+    setSavedBoards(boards);
+    renderSavedBoards();
+    return;
+  }
+  const found = boards.find((x) => x.id === id);
+  if (!found) return;
+  const clean = sanitizeBoard(found.data);
+  if (clean) {
+    Object.assign(state, { swaps: {}, quoteSwaps: {}, font: '', layout: 'collage', calMonth: 0, stamp: '' }, clean);
+    activeSavedId = id;
+    previewMode = 'lock';
+    syncControlsFromState();
+    renderSavedBoards();
+    schedule(true);
+    toast(`Loaded "${found.name}"`);
+  }
+});
+
+// ---------- preview mode switcher ----------
+function markPreviewMode() {
+  $$('#previewModes [data-pmode]').forEach((b) => {
+    const on = b.dataset.pmode === previewMode;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-selected', String(on));
+  });
+}
+$('#previewModes').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-pmode]'); if (!b) return;
+  previewMode = b.dataset.pmode;
+  markPreviewMode();
+  schedule(false);
+  track('preview_mode', { mode: previewMode });
+  if (!isPro && previewMode !== 'lock') gcEvent('preview-pro-' + previewMode, 'Preview ' + previewMode);
+});
+
 // ---------- step 3 ----------
+function buildMonthPills() {
+  const wrap = $('#monthPills'); if (!wrap) return;
+  wrap.innerHTML = MONTH_NAMES.map((m, i) => `<button type="button" data-cmonth="${i}" class="${i === state.calMonth ? 'on' : ''}">${m.slice(0, 3)}</button>`).join('');
+}
+function markFont() { $$('#fontSeg button').forEach((x) => x.classList.toggle('on', x.dataset.font === (state.font || ''))); }
+function markLayout() {
+  $$('#layoutSeg button').forEach((x) => x.classList.toggle('on', x.dataset.layout === (state.layout || 'collage')));
+  const row = $('#calMonthRow'); if (row) row.hidden = state.layout !== 'calendar';
+  $$('#monthPills button').forEach((x) => x.classList.toggle('on', +x.dataset.cmonth === (state.calMonth || 0)));
+}
+function markStamp() { $$('#stampSeg button').forEach((x) => x.classList.toggle('on', x.dataset.stamp === (state.stamp || ''))); }
+function markSize() { $$('#sizeSeg button').forEach((x) => x.classList.toggle('on', x.dataset.size === state.size)); }
+function syncProBadges() {
+  $$('#previewModes .mini-pro, #layoutSeg .mini-pro, #stampSeg .mini-pro, #sizeSeg .mini-pro, .aff-teaser .mini-pro').forEach((el) => { el.hidden = isPro; });
+  const az = $('#affZipBtn'), cz = $('#calZipBtn');
+  if (az) az.innerHTML = isPro ? 'Download all 30 (.zip)' : 'Download all 30 (.zip) <b class="mini-pro">PRO</b>';
+  if (cz) cz.innerHTML = isPro ? 'Download all 12 (.zip)' : 'Download all 12 (.zip) <b class="mini-pro">PRO</b>';
+}
+function syncControlsFromState() {
+  $('#titleInput').value = state.title;
+  $('#wordInput').value = state.word;
+  $('#clockToggle').checked = !!state.clockSafe;
+  markFont(); markLayout(); markStamp(); markSize(); markPreviewMode(); renderChips(); markTheme(); syncProBadges();
+}
+
 $('#titleInput').addEventListener('input', (e) => { state.title = e.target.value; schedule(false); });
 $('#wordInput').addEventListener('input', (e) => { state.word = e.target.value; schedule(false); });
-$('#clockToggle').addEventListener('change', (e) => { state.clockSafe = e.target.checked; $('#device').classList.toggle('nolock', !state.clockSafe); schedule(true); });
+$('#clockToggle').addEventListener('change', (e) => { state.clockSafe = e.target.checked; if (previewMode !== 'lock') { previewMode = 'lock'; markPreviewMode(); } schedule(true); });
+$('#layoutSeg').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-layout]'); if (!b) return;
+  state.layout = b.dataset.layout;
+  if (previewMode !== 'lock') { previewMode = 'lock'; markPreviewMode(); }
+  markLayout(); schedule(false);
+  track('board_layout', { layout: state.layout });
+  if (!isPro && state.layout !== 'collage') gcEvent('pro-layout-' + state.layout, 'Preview layout ' + state.layout);
+});
+$('#monthPills').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-cmonth]'); if (!b) return;
+  state.calMonth = +b.dataset.cmonth;
+  if (previewMode !== 'lock') { previewMode = 'lock'; markPreviewMode(); }
+  markLayout(); schedule(false);
+  track('calendar_month', { month: state.calMonth + 1 });
+});
+$('#stampSeg').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-stamp]'); if (!b) return;
+  state.stamp = b.dataset.stamp;
+  if (previewMode !== 'lock') { previewMode = 'lock'; markPreviewMode(); }
+  markStamp(); schedule(false);
+  track('board_stamp', { stamp: state.stamp || 'default' });
+  if (!isPro && ['angel', 'seal', 'postmark'].includes(state.stamp)) gcEvent('pro-stamp-' + state.stamp, 'Preview stamp ' + state.stamp);
+});
 $('#photoInput').addEventListener('change', async (e) => {
   const files = Array.from(e.target.files || []).slice(0, 6);
   const imgs = await Promise.all(files.map((f) => new Promise((res) => {
@@ -227,45 +399,84 @@ $('#photoInput').addEventListener('change', async (e) => {
 $('#clearPhotos').addEventListener('click', () => { state.userPhotos = []; $('#clearPhotos').hidden = true; schedule(true); });
 $('#sizeSeg').addEventListener('click', (e) => {
   const b = e.target.closest('[data-size]'); if (!b) return;
-  state.size = b.dataset.size; $$('#sizeSeg button').forEach((x) => x.classList.toggle('on', x === b));
-  const dev = $('#device');
-  dev.classList.toggle('landscape', state.size === 'desktop'); dev.classList.toggle('paper', state.size === 'print'); dev.classList.toggle('story', state.size === 'story'); dev.classList.toggle('ipad', state.size === 'ipad');
+  state.size = b.dataset.size;
+  if (previewMode !== 'lock') { previewMode = 'lock'; markPreviewMode(); }
+  markSize();
   schedule(false);
 });
-$('#shuffleBtn').addEventListener('click', () => { state.seed = Math.floor(Math.random() * 1e6) + 1; state.swaps = {}; schedule(true); track('shuffle'); });
+$('#shuffleBtn').addEventListener('click', () => {
+  state.seed = Math.floor(Math.random() * 1e6) + 1; state.swaps = {}; state.quoteSwaps = {};
+  schedule(true); track('shuffle');
+});
 $('#fontSeg').addEventListener('click', (e) => {
   const b = e.target.closest('[data-font]'); if (!b) return;
-  state.font = b.dataset.font; $$('#fontSeg button').forEach((x) => x.classList.toggle('on', x === b));
+  state.font = b.dataset.font; markFont();
   schedule(true); track('title_font', { font: state.font || 'default' });
 });
-function markFont() { $$('#fontSeg button').forEach((x) => x.classList.toggle('on', x.dataset.font === (state.font || ''))); }
 $('#preview').addEventListener('click', (e) => {
+  if (previewMode !== 'lock') return;
   const cv = $('#preview'); const items = cv._items; if (!items) return;
   const rect = cv.getBoundingClientRect();
   const x = (e.clientX - rect.left) * cv.width / rect.width, y = (e.clientY - rect.top) * cv.height / rect.height;
-  const hit = items.find((it) => it.type === 'photo' && !it.user && x >= it.x && x <= it.x + it.w && y >= it.y && y <= it.y + it.h);
+  const hit = items.find((it) => x >= it.x && x <= it.x + it.w && y >= it.y && y <= it.y + it.h);
   if (!hit) return;
-  state.swaps = state.swaps || {}; state.swaps[hit.pidx] = (state.swaps[hit.pidx] || 0) + 1;
-  schedule(false); track('photo_swap');
-  const h = $('#swapHint'); if (h) h.classList.add('done');
+  if (hit.type === 'photo' && !hit.user) {
+    state.swaps = state.swaps || {}; state.swaps[hit.pidx] = (state.swaps[hit.pidx] || 0) + 1;
+    schedule(false); track('photo_swap');
+    const h = $('#swapHint'); if (h) h.classList.add('done');
+  } else if (hit.type === 'text') {
+    if (hit.label) {
+      toast('Custom goal card — edit yours in Step 1 ✨');
+      return;
+    }
+    state.quoteSwaps = state.quoteSwaps || {}; state.quoteSwaps[hit.tidx] = (state.quoteSwaps[hit.tidx] || 0) + 1;
+    schedule(false); track('quote_swap');
+    const h = $('#swapHint'); if (h) h.classList.add('done');
+  }
 });
 
 // ---------- preview ----------
 let previewTimer, rendering = false, pending = false;
-function schedule(thumbs) { clearTimeout(previewTimer); previewTimer = setTimeout(renderPreview, 40); if (thumbs) renderThumbs(); }
+function schedule(thumbs) {
+  saveDraft();
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(renderPreview, 40);
+  if (thumbs) renderThumbs();
+}
 async function renderPreview() {
   if (rendering) { pending = true; return; }
   rendering = true;
   const cv = $('#preview'); const dev = $('#device');
-  const sz = SIZES[state.size];
+  const t = themeById(state.themeId);
+  const isChecklist = previewMode === 'checklist';
+  const isHome = previewMode === 'home';
+  const sz = isChecklist ? SIZES.print : isHome ? (state.size === 'android' ? SIZES.android : SIZES.iphone) : SIZES[state.size];
+
+  dev.classList.toggle('landscape', previewMode === 'lock' && state.size === 'desktop');
+  dev.classList.toggle('paper', isChecklist || (previewMode === 'lock' && state.size === 'print'));
+  dev.classList.toggle('story', previewMode === 'lock' && state.size === 'story');
+  dev.classList.toggle('card34', previewMode === 'lock' && state.size === 'card');
+  dev.classList.toggle('ipad', previewMode === 'lock' && state.size === 'ipad');
+  dev.classList.toggle('pmode-home', isHome);
+  dev.classList.toggle('nolock', !state.clockSafe);
+
   const cssW = cv.clientWidth || 320;
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const w = Math.round(cssW * dpr), h = Math.round(w * sz.h / sz.w);
-  const t = themeById(state.themeId);
-  dev.classList.toggle('is-pro', t.pro && !isPro);
+  dev.classList.toggle('is-pro', needsPro());
   updateDlLabel();
   dev.classList.toggle('light', !['oldmoney', 'darkluxe', 'mobwife', 'cozywinter', 'academia', 'film', 'celestial'].includes(t.id));
-  await renderBoard(cv, state, { width: w, height: h, kind: sz.kind, watermark: !isPro });
+
+  if (isChecklist) {
+    await renderChecklist(cv, state, w, h);
+  } else if (isHome) {
+    const hw = $('.hm-widget span', dev), hs = $('.hm-widget small', dev);
+    if (hw) hw.textContent = (state.title || '2027').trim().slice(0, 8) || '2027';
+    if (hs) hs.textContent = (state.word || 'daily focus').trim().slice(0, 14);
+    await renderHome(cv, state, w, h);
+  } else {
+    await renderBoard(cv, state, { width: w, height: h, kind: sz.kind, watermark: !isPro });
+  }
   const ft = $('#fabThumb canvas');
   if (ft) { ft.width = 96; ft.height = Math.round(96 * h / w); ft.getContext('2d').drawImage(cv, 0, 0, ft.width, ft.height); }
   rendering = false;
@@ -284,15 +495,31 @@ async function renderHero() {
     const p = presets[i];
     cv.closest('.phone').classList.toggle('light', p.themeId !== 'darkluxe');
     const w = Math.round((cv.clientWidth || 220) * Math.min(window.devicePixelRatio || 1, 2));
-    await renderBoard(cv, { ...state, ...p, custom: [], userPhotos: [], title: '2027', clockSafe: true }, { width: w, height: Math.round(w * 2556 / 1179) });
+    await renderBoard(cv, { ...state, ...p, custom: [], userPhotos: [], title: '2027', clockSafe: true, font: '', layout: 'collage', stamp: '', swaps: {}, quoteSwaps: {} }, { width: w, height: Math.round(w * 2556 / 1179) });
   }
 }
 
 // ---------- download ----------
-function needsPro() { return !isPro && (themeById(state.themeId).pro || SIZES[state.size].pro); }
+function isProCustom() {
+  return (state.layout && state.layout !== 'collage') || ['angel', 'seal', 'postmark'].includes(state.stamp);
+}
+function needsPro() {
+  return !isPro && (previewMode !== 'lock' || themeById(state.themeId).pro || SIZES[state.size].pro || isProCustom());
+}
+function proReason() {
+  if (previewMode === 'checklist') return 'checklist';
+  if (previewMode === 'home') return 'home_screen';
+  if (state.layout === 'calendar') return 'calendar';
+  if (state.layout && state.layout !== 'collage') return 'layout';
+  if (['angel', 'seal', 'postmark'].includes(state.stamp)) return 'stamp';
+  if (SIZES[state.size].pro) return 'size';
+  return 'theme';
+}
 async function download() {
-  track('download_click', { theme: state.themeId, size: state.size });
-  if (needsPro()) { openPay(); return; }
+  track('download_click', { theme: state.themeId, size: state.size, mode: previewMode, layout: state.layout, stamp: state.stamp });
+  if (needsPro()) { openPay(proReason()); return; }
+  if (previewMode === 'checklist') { $('#checklistBtn').click(); return; }
+  if (previewMode === 'home') { $('#homeBtn').click(); return; }
   const btns = [$('#downloadBtn'), $('#fabDownload')];
   btns.forEach((b) => { b.disabled = true; b.dataset.old = b.innerHTML; b.textContent = T('rendering'); });
   try {
@@ -304,15 +531,16 @@ async function download() {
       if (blob) break;
     }
     if (!blob) { toast('Your browser ran out of memory. Try again, or use the iPhone size.'); track('download_fail', { size: state.size }); return; }
-    showResult(blob, state.size === 'story' ? 'glowboard-2027-story.png' : undefined);
+    const fname = state.size === 'story' ? 'glowboard-2027-story.png' : state.size === 'card' ? 'glowboard-2027-card.png' : undefined;
+    showResult(blob, fname);
     if (k < 1) toast('Saved at a lighter size: your browser was low on memory.');
-    track('download_ok', { theme: state.themeId, size: state.size, pro: isPro, scale: k });
+    track('download_ok', { theme: state.themeId, size: state.size, pro: isPro, scale: k, layout: state.layout });
     if (!isPro) gcEvent('free-download', 'Free ' + state.size + ' download');
     if (state.size === 'story') gcEvent('story-export', 'Story size export');
   } catch (e) {
     toast('Something went wrong. Please try again.'); track('download_fail', { size: state.size });
   } finally {
-    btns.forEach((b) => { b.disabled = false; b.innerHTML = b.dataset.old; });
+    btns.forEach((b) => { b.disabled = false; b.innerHTML = b.dataset.old; updateDlLabel(); });
   }
 }
 let lastBlob = null, lastUrl = null;
@@ -322,7 +550,7 @@ function showResult(blob, name) {
   $('#resultUpsell').style.display = isPro ? 'none' : '';
   $('#homeBtn').innerHTML = isPro ? 'Get it' : 'Get it <b class="mini-pro">PRO</b>';
   // one upsell for free users (the card above); Pro users get the extras as plain actions
-  $('#homeTeaser').hidden = !isPro || !!(name && name !== 'glowboard-2027.png') || ['desktop', 'print', 'story', 'ipad'].includes(state.size);
+  $('#homeTeaser').hidden = !isPro || !!(name && name !== 'glowboard-2027.png') || ['desktop', 'print', 'story', 'card', 'ipad'].includes(state.size);
   $('#setBtn').innerHTML = isPro ? 'Download the set (.zip)' : 'Get the set <b class="mini-pro">PRO</b>';
   $('#setTeaser').hidden = !isPro || !!(name && /set|checklist|home/.test(name));
   if (!isPro) renderBoard($('#upsellCv'), state, { width: 140, height: 303, watermark: false });
@@ -349,7 +577,8 @@ $('#downloadBtn').addEventListener('click', download);
 $('#upsellBtn').addEventListener('click', () => { closeModals(); openPay('result_upsell'); });
 function updateDlLabel() {
   const lock = needsPro();
-  const label = lock ? 'Unlock & download' : T('download');
+  const baseLabel = previewMode === 'checklist' ? 'Download my checklist' : previewMode === 'home' ? 'Download home screen' : state.size === 'card' ? 'Download my 3:4 card' : T('download');
+  const label = lock ? 'Unlock & download' : baseLabel;
   const s = $('#downloadBtn [data-i18n="download"]'); if (s) s.textContent = label;
   $('#fabDownload').textContent = lock ? '✦ ' + label : label;
   $('#downloadBtn').classList.toggle('locked', lock); $('#fabDownload').classList.toggle('locked', lock);
@@ -389,23 +618,57 @@ $('#tplBtn').addEventListener('click', async () => {
 });
 
 // ---------- pro / pay ----------
+const PAY_CONTEXT = {
+  checklist: { eye: 'Glowboard Pro · Printable Kit', title: 'Unlock your <em>2027 goals checklist</em>', freeCap: 'Free board', proCap: 'A4 Checklist' },
+  home_screen: { eye: 'Glowboard Pro · Matching Pair', title: 'Get your matching <em>Home + Lock</em> pair', freeCap: 'Lock screen', proCap: 'Home screen' },
+  calendar: { eye: 'Glowboard Pro · Calendar Mode', title: 'Put <em>2027 monthly calendars</em> on your lock screen', freeCap: 'Free', proCap: '2027 Calendar' },
+  cal_pack: { eye: 'Glowboard Pro · 12-Month Pack', title: 'Unlock all 12 <em>monthly 2027</em> lock screens', freeCap: 'January (Free)', proCap: 'All 12 Months' },
+  layout: { eye: 'Glowboard Pro · Editorial Studio', title: 'Unlock <em>Editorial cover</em> &amp; Pro layouts', freeCap: 'Standard', proCap: 'Editorial Pro' },
+  stamp: { eye: 'Glowboard Pro · Signature Accents', title: 'Unlock <em>Gold Wax Seal</em>, 11:11 &amp; Postmarks', freeCap: 'Standard', proCap: 'Pro Accent' },
+  saved_boards: { eye: 'Glowboard Pro · Unlimited Slots', title: 'Save <em>unlimited</em> 2027 vision boards', freeCap: '1 Free Slot', proCap: 'Unlimited Pro' },
+  aff_pack: { eye: 'Glowboard Pro · 30-Day Pack', title: 'Unlock all 30 <em>daily affirmations</em> (.zip)', freeCap: 'Free', proCap: '30-Day Pack' },
+  full_set: { eye: 'Glowboard Pro · Complete Bundle', title: 'Your entire <em>2027 kit</em> in one .zip', freeCap: 'Single PNG', proCap: 'Complete .zip' },
+  size: { eye: 'Glowboard Pro · High-Res Exports', title: 'Unlock <em>4K Desktop, iPad</em> &amp; Print A4', freeCap: 'Phone', proCap: '4K / Print' },
+};
 function openPay(reason) {
   const cur = themeById(state.themeId);
   const freeTheme = cur.pro ? 'clean' : state.themeId;
-  const proTheme = cur.pro ? state.themeId : (THEMES.find((t) => t.pro) || cur).id;
+  const proTheme = cur.pro ? state.themeId : (isProCustom() ? state.themeId : (THEMES.find((t) => t.pro) || cur).id);
+  const ctxInfo = PAY_CONTEXT[reason] || { eye: 'Glowboard Pro · Complete 2027 Kit', title: 'Get this look, <em>watermark&#8209;free</em>', freeCap: 'Free', proCap: 'Pro' };
+  const eyeEl = $('#payEyebrow'), titleEl = $('#payTitle'), fcEl = $('#cmpFreeCap'), pcEl = $('#cmpProCap'), proWrap = $('#cmpProWrap');
+  if (eyeEl) eyeEl.textContent = ctxInfo.eye;
+  if (titleEl) titleEl.innerHTML = ctxInfo.title;
+  if (fcEl) fcEl.textContent = ctxInfo.freeCap;
+  if (pcEl) pcEl.textContent = ctxInfo.proCap;
+  if (proWrap) proWrap.classList.toggle('is-paper', reason === 'checklist');
+
   const W = 300, H = Math.round(300 * 2556 / 1179);
   openModal('payModal');
-  renderBoard($('#cmpFree'), { ...state, themeId: freeTheme }, { width: W, height: H, watermark: true });
-  renderBoard($('#cmpPro'), { ...state, themeId: proTheme }, { width: W, height: H, watermark: false });
+  renderBoard($('#cmpFree'), { ...state, themeId: freeTheme, layout: 'collage', stamp: '' }, { width: W, height: H, watermark: reason !== 'home_screen' });
+  if (reason === 'checklist') {
+    renderChecklist($('#cmpPro'), state, 340, 481);
+  } else if (reason === 'home_screen') {
+    renderHome($('#cmpPro'), state, W, H);
+  } else if (reason === 'calendar' || reason === 'cal_pack') {
+    renderBoard($('#cmpPro'), { ...state, themeId: state.themeId, layout: 'calendar', calMonth: state.calMonth || 1 }, { width: W, height: H, watermark: false });
+  } else {
+    renderBoard($('#cmpPro'), { ...state, themeId: proTheme }, { width: W, height: H, watermark: false });
+  }
   const strip = $('#proStrip');
   if (!strip.childElementCount) {
     THEMES.filter((t) => t.pro).forEach((t) => {
       const fig = document.createElement('figure'); const c = document.createElement('canvas'); fig.appendChild(c);
       const cap = document.createElement('figcaption'); cap.textContent = t.name; fig.appendChild(cap); strip.appendChild(fig);
       fig.tabIndex = 0; fig.setAttribute('role', 'button'); fig.setAttribute('aria-label', 'Preview ' + t.name);
-      const pick = () => { strip.querySelectorAll('figure').forEach((f) => f.classList.toggle('on', f === fig)); renderBoard($('#cmpPro'), { ...state, themeId: t.id }, { width: W, height: H, watermark: false }); track('paywall_style', { theme: t.id }); };
+      const pick = () => {
+        if (proWrap) proWrap.classList.remove('is-paper');
+        if (pcEl) pcEl.textContent = t.name;
+        strip.querySelectorAll('figure').forEach((f) => f.classList.toggle('on', f === fig));
+        renderBoard($('#cmpPro'), { ...state, themeId: t.id }, { width: W, height: H, watermark: false });
+        track('paywall_style', { theme: t.id });
+      };
       fig.addEventListener('click', pick); fig.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } });
-      renderBoard(c, { ...state, themeId: t.id, userPhotos: [] }, { width: 120, height: 260 });
+      renderBoard(c, { ...state, themeId: t.id, userPhotos: [], layout: 'collage', stamp: '' }, { width: 120, height: 260 });
     });
   }
   strip.querySelectorAll('figure').forEach((f, i) => f.classList.toggle('on', THEMES.filter((t) => t.pro)[i].id === proTheme));
@@ -426,15 +689,19 @@ $('#giftFreeBtn').addEventListener('click', () => {
   setTimeout(() => toast('Design it for them, then tap “Send this board to a friend” 💌'), 700);
 });
 $$('.unlock-btn').forEach((b) => b.addEventListener('click', () => {
+  saveDraft();
   track('unlock_click');
   gcEvent('buy-click', 'Unlock Pro');
   if (CFG.PRO_PAYMENT_URL) window.open(CFG.PRO_PAYMENT_URL, '_blank', 'noopener');
   else location.href = `mailto:${CFG.CONTACT_EMAIL}?subject=${encodeURIComponent('Glowboard Pro waitlist')}&body=${encodeURIComponent('Hi! Please let me know when Glowboard Pro is live.')}`;
 }));
 $('#freeAlt').addEventListener('click', () => {
+  previewMode = 'lock';
   if (themeById(state.themeId).pro) state.themeId = 'clean';
-  if (SIZES[state.size].pro) $('#sizeSeg [data-size="iphone"]').click();
-  markTheme(); closeModals(); schedule(false);
+  if (SIZES[state.size].pro) state.size = 'iphone';
+  if (state.layout !== 'collage') state.layout = 'collage';
+  if (['angel', 'seal', 'postmark'].includes(state.stamp)) state.stamp = '';
+  syncControlsFromState(); closeModals(); schedule(true);
 });
 $$('.code-btn').forEach((b) => b.addEventListener('click', () => { closeModals(); $('#codeMsg').textContent = ''; openModal('codeModal'); setTimeout(() => $('#codeInput').focus(), 50); }));
 $('#codeForm').addEventListener('submit', async (e) => {
@@ -453,7 +720,9 @@ async function tryUnlock(code) {
     gcEvent('unlock-fail', 'Unlock failed');
     return false;
   }
-  store.set('gb_pro', '1'); isPro = true; renderVibes(); confetti(); toast(T('unlocked')); schedule(true); track('unlocked');
+  store.set('gb_pro', '1'); isPro = true;
+  renderVibes(); renderSavedBoards(); syncProBadges();
+  confetti(); toast(T('unlocked')); schedule(true); track('unlocked');
   gcEvent('unlock-success', 'Unlock success');
   return true;
 }
@@ -468,19 +737,36 @@ async function canvasBlob(fn, type = 'image/png', q) {
     return await new Promise((res) => { try { cv.toBlob((b) => res(b && b.size ? b : null), type, q); } catch (e) { res(null); } });
   } finally { cv.width = cv.height = 0; await new Promise((r) => setTimeout(r, 30)); }
 }
-$('#setBtn').addEventListener('click', async () => {
+async function deliverZip(files, filename, eventTag) {
+  const zip = await makeZip(files);
+  const zfile = new File([zip], filename, { type: 'application/zip' });
+  if (IS_IOS && navigator.canShare && navigator.canShare({ files: [zfile] })) {
+    try { await navigator.share({ files: [zfile] }); toast('Choose “Save to Files” to keep your pack ✨'); gcEvent(eventTag, filename); return true; }
+    catch (err) { if (err && err.name === 'AbortError') return false; }
+  }
+  if (IN_APP) toast('If nothing downloads, tap ⋯ and choose Open in Safari / your browser.');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(zip); a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+  gcEvent(eventTag, filename);
+  return true;
+}
+
+async function downloadFullSet(btn) {
   track('set_click', { pro: isPro });
   if (!isPro) { closeModals(); openPay('full_set'); return; }
-  const b = $('#setBtn'); const old = b.innerHTML; b.disabled = true;
+  const b = btn || $('#setBtn'); const old = b.innerHTML; b.disabled = true;
   try {
     const phone = state.size === 'android' ? SIZES.android : SIZES.iphone;
+    const mIdx = state.calMonth || 0;
+    const mSlug = MONTH_NAMES[mIdx].toLowerCase();
     const jobs = [
       ['1-lock-screen.png', (cv, k) => renderBoard(cv, state, { width: R(phone.w, k), height: R(phone.h, k), kind: phone.kind, watermark: false })],
       ['2-home-screen.png', (cv, k) => renderHome(cv, state, R(phone.w, k), R(phone.h, k))],
       ['3-ipad.png', (cv, k) => renderBoard(cv, state, { width: R(SIZES.ipad.w, k), height: R(SIZES.ipad.h, k), kind: 'ipad', watermark: false })],
       ['4-desktop-4k.png', (cv, k) => renderBoard(cv, state, { width: R(SIZES.desktop.w, k), height: R(SIZES.desktop.h, k), kind: SIZES.desktop.kind, watermark: false })],
       ['5-ig-story.png', (cv, k) => renderBoard(cv, state, { width: R(SIZES.story.w, k), height: R(SIZES.story.h, k), kind: 'story', watermark: false })],
-      ['6-goals-checklist-a4.png', (cv, k) => renderChecklist(cv, state, R(2480, k), R(3508, k))],
+      [`6-calendar-${mSlug}-2027.png`, (cv, k) => renderBoard(cv, { ...state, layout: 'calendar', calMonth: mIdx }, { width: R(phone.w, k), height: R(phone.h, k), kind: phone.kind, watermark: false })],
+      ['7-goals-checklist-a4.png', (cv, k) => renderChecklist(cv, state, R(2480, k), R(3508, k))],
     ];
     // widget pack: 4 square affirmation tiles + 1 wide word-of-the-year tile (for Photos / Widgetsmith widgets)
     const wAffs = pickAffs(4);
@@ -491,7 +777,6 @@ $('#setBtn').addEventListener('click', async () => {
     for (let i = 0; i < jobs.length; i++) {
       b.textContent = `Making ${i + 1}/${jobs.length}…`;
       let blob = null, used = 1;
-      // big canvases can exceed phone memory (esp. iOS Safari): retry smaller instead of failing the whole set
       for (const k of [1, 0.7, 0.5]) { used = k; blob = await canvasBlob((cv) => jobs[i][1](cv, k), 'image/jpeg', 0.93).catch(() => null); if (blob) break; }
       const nm = jobs[i][0].replace('.png', '.jpg');
       if (!blob) { skipped.push(nm); continue; }
@@ -503,21 +788,15 @@ $('#setBtn').addEventListener('click', async () => {
       const note = 'Glowboard 2027 set\n\nYour browser was low on memory, so:\n' + (lighter.length ? '- made at a lighter size: ' + lighter.join(', ') + '\n' : '') + (skipped.length ? '- skipped: ' + skipped.join(', ') + ' (download these one by one from the Size options)\n' : '') + '\nOpen glowboard on a computer for full-size files.\n';
       files.push({ name: 'glowboard-2027/READ-ME.txt', blob: new Blob([note], { type: 'text/plain' }) });
     }
-    const zip = await makeZip(files);
-    const zfile = new File([zip], 'glowboard-2027-set.zip', { type: 'application/zip' });
-    // iPhone/iPad: the share sheet ("Save to Files") is more reliable than a blob download, especially in in-app browsers
-    if (IS_IOS && navigator.canShare && navigator.canShare({ files: [zfile] })) {
-      try { await navigator.share({ files: [zfile] }); toast('Choose “Save to Files” to keep your set ✨'); track('set_ok', { via: 'share' }); gcEvent('pro-zip-download', 'Pro set zip'); return; }
-      catch (err) { if (err && err.name === 'AbortError') return; }
-    }
-    if (IN_APP) toast('If nothing downloads, tap ⋯ and choose Open in Safari / your browser.');
-    const a = document.createElement('a'); a.href = URL.createObjectURL(zip); a.download = 'glowboard-2027-set.zip'; document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href), 60000);
-    if (!IN_APP) toast(skipped.length ? 'Set downloading (some files skipped, see READ-ME) ✨' : 'Your 2027 set is downloading ✨'); track('set_ok', { lighter: lighter.length, skipped: skipped.length }); gcEvent('pro-zip-download', 'Pro set zip');
+    const ok = await deliverZip(files, 'glowboard-2027-set.zip', 'pro-zip-download');
+    if (ok && !IN_APP && !(IS_IOS && navigator.canShare)) toast(skipped.length ? 'Set downloading (some files skipped, see READ-ME) ✨' : 'Your 2027 set is downloading ✨');
+    track('set_ok', { lighter: lighter.length, skipped: skipped.length });
   } catch (e) {
     toast('Something went wrong making the set. Please try again.'); track('set_fail');
   } finally { b.disabled = false; b.innerHTML = old; }
-});
+}
+$('#setBtn').addEventListener('click', () => downloadFullSet($('#setBtn')));
+$('#makerSetBtn').addEventListener('click', () => downloadFullSet($('#makerSetBtn')));
 $('#homeBtn').addEventListener('click', async () => {
   track('home_click', { pro: isPro });
   if (!isPro) { closeModals(); openPay('home_screen'); return; }
@@ -548,8 +827,7 @@ function pickAffs(n) {
   }
   return out;
 }
-$('#affBtn').addEventListener('click', () => {
-  const grid = $('#affGrid'); grid.innerHTML = '';
+function buildAffPool30() {
   const pool = [];
   const goals = state.goals.length ? state.goals : Object.keys(AFFIRMATIONS);
   let gi = 0; const used = new Set();
@@ -559,18 +837,97 @@ $('#affBtn').addEventListener('click', () => {
     if (!used.has(a)) { used.add(a); pool.push(a); }
   }
   if (pool.length < 30) Object.values(AFFIRMATIONS).forEach((v) => v[state.lang].forEach((a) => { if (pool.length < 30 && !used.has(a)) { used.add(a); pool.push(a); } }));
+  return pool;
+}
+$('#affBtn').addEventListener('click', () => {
+  const grid = $('#affGrid'); grid.innerHTML = '';
+  const pool = buildAffPool30();
+  syncProBadges();
   pool.forEach((text, i) => {
     const b = document.createElement('button'); b.type = 'button'; b.className = 'aff-item' + (!isPro && i >= 3 ? ' locked' : '');
     const cv = document.createElement('canvas'); b.appendChild(cv); grid.appendChild(b);
     renderAffirmation(cv, state.themeId, text, i + 7, 236, 511, i + 1, state.lang);
     b.addEventListener('click', () => {
-      if (!isPro && (i >= 3 || themeById(state.themeId).pro)) { closeModals(); openPay(); return; }
+      if (!isPro && (i >= 3 || themeById(state.themeId).pro)) { closeModals(); openPay('aff_pack'); return; }
       const big = document.createElement('canvas'); renderAffirmation(big, state.themeId, text, i + 7, 1179, 2556, i + 1, state.lang);
       big.toBlob((blob) => { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `glowboard-affirmation-${i + 1}.png`; a.click(); });
       track('aff_download');
     });
   });
   openModal('affModal'); track('aff_open');
+});
+$('#affZipBtn').addEventListener('click', async () => {
+  track('aff_zip_click', { pro: isPro });
+  if (!isPro) { closeModals(); openPay('aff_pack'); return; }
+  const b = $('#affZipBtn'); const old = b.innerHTML; b.disabled = true;
+  try {
+    const pool = buildAffPool30();
+    const phone = state.size === 'android' ? SIZES.android : SIZES.iphone;
+    const files = [];
+    for (let i = 0; i < pool.length; i++) {
+      b.textContent = `Making ${i + 1}/30…`;
+      let blob = null;
+      for (const k of [1, 0.7]) {
+        blob = await canvasBlob((cv) => { renderAffirmation(cv, state.themeId, pool[i], i + 7, R(phone.w, k), R(phone.h, k), i + 1, state.lang); }, 'image/jpeg', 0.92).catch(() => null);
+        if (blob) break;
+      }
+      if (blob) files.push({ name: `glowboard-affirmations-2027/day-${String(i + 1).padStart(2, '0')}.jpg`, blob });
+    }
+    if (!files.length) { toast('Your browser ran out of memory. Try on a computer.'); return; }
+    const ok = await deliverZip(files, 'glowboard-30-affirmations.zip', 'pro-aff-zip');
+    if (ok && !IN_APP && !(IS_IOS && navigator.canShare)) toast('All 30 affirmation lock screens downloading ✨');
+    track('aff_zip_ok');
+  } finally { b.disabled = false; b.innerHTML = old; }
+});
+
+// ---------- 12-month 2027 calendar pack ----------
+$('#calPackBtn').addEventListener('click', async () => {
+  const grid = $('#calGrid'); grid.innerHTML = '';
+  syncProBadges();
+  openModal('calModal'); track('cal_pack_open');
+  for (let m = 0; m < 12; m++) {
+    const locked = !isPro && m > 0;
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'cal-item' + (locked ? ' locked' : '');
+    const cv = document.createElement('canvas'); cv.width = 236; cv.height = 511; b.appendChild(cv);
+    if (locked) { const lk = document.createElement('span'); lk.className = 'cal-lock'; lk.textContent = '🔒 PRO'; b.appendChild(lk); }
+    const cap = document.createElement('span'); cap.className = 'cal-cap';
+    cap.innerHTML = `${MONTH_NAMES[m]}${m === 0 && !isPro ? ' <b class="free-try-pill">Free</b>' : ''}`;
+    b.appendChild(cap); grid.appendChild(b);
+    b.addEventListener('click', async () => {
+      if (locked) { closeModals(); openPay('cal_pack'); return; }
+      if (!isPro && themeById(state.themeId).pro) { closeModals(); openPay('theme'); return; }
+      const phone = state.size === 'android' ? SIZES.android : SIZES.iphone;
+      const blob = await canvasBlob((big) => renderBoard(big, { ...state, layout: 'calendar', calMonth: m }, { width: phone.w, height: phone.h, kind: phone.kind, watermark: !isPro }));
+      if (!blob) { toast('Could not render image. Please try again.'); return; }
+      closeModals();
+      showResult(blob, `glowboard-2027-${MONTH_NAMES[m].toLowerCase()}.png`);
+      track('cal_month_download', { month: m + 1, pro: isPro });
+    });
+    renderBoard(cv, { ...state, layout: 'calendar', calMonth: m }, { width: 236, height: 511, watermark: false });
+    await new Promise((res) => (window.requestIdleCallback || setTimeout)(res, { timeout: 90 }));
+  }
+});
+$('#calZipBtn').addEventListener('click', async () => {
+  track('cal_zip_click', { pro: isPro });
+  if (!isPro) { closeModals(); openPay('cal_pack'); return; }
+  const b = $('#calZipBtn'); const old = b.innerHTML; b.disabled = true;
+  try {
+    const phone = state.size === 'android' ? SIZES.android : SIZES.iphone;
+    const files = [];
+    for (let m = 0; m < 12; m++) {
+      b.textContent = `Making ${m + 1}/12…`;
+      let blob = null;
+      for (const k of [1, 0.7]) {
+        blob = await canvasBlob((cv) => renderBoard(cv, { ...state, layout: 'calendar', calMonth: m }, { width: R(phone.w, k), height: R(phone.h, k), kind: phone.kind, watermark: false }), 'image/jpeg', 0.93).catch(() => null);
+        if (blob) break;
+      }
+      if (blob) files.push({ name: `glowboard-2027-calendars/${String(m + 1).padStart(2, '0')}-${MONTH_NAMES[m].toLowerCase()}-2027.jpg`, blob });
+    }
+    if (!files.length) { toast('Your browser ran out of memory. Try on a computer.'); return; }
+    const ok = await deliverZip(files, 'glowboard-2027-calendars.zip', 'pro-cal-zip');
+    if (ok && !IN_APP && !(IS_IOS && navigator.canShare)) toast('All 12 monthly calendar lock screens downloading ✨');
+    track('cal_zip_ok');
+  } finally { b.disabled = false; b.innerHTML = old; }
 });
 
 // ---------- modal / toast / confetti ----------
@@ -589,7 +946,7 @@ function showNudge(kind) {
   const n = $('#nudge');
   if (kind === 'exit') {
     $('#nudgeTitle').textContent = 'Your 2027 board is one tap away';
-    $('#nudgeText').innerHTML = 'Save the free version now, or go watermark-free with all 18 looks. <span class="pro-price">$4.99</span> once.';
+    $('#nudgeText').innerHTML = `Save the free version now, or go watermark-free with all 18 looks. <span class="pro-price">${escapeHtml(CFG.PRO_PRICE_LABEL)}</span> once.`;
     $('#nudgeGo').textContent = 'Save my board';
   }
   const cv = $('#nudgeCv'); const pt = THEMES.find((t) => t.id === state.themeId);
@@ -639,20 +996,24 @@ function showReveal() {
 $('#revealSave').addEventListener('click', () => { closeModals(); track('reveal_save', { theme: state.themeId }); download(); });
 $('#revealEdit').addEventListener('click', () => { closeModals(); track('reveal_edit'); $('#make').scrollIntoView({ behavior: 'smooth' }); });
 (async function init() {
+  const draft = loadDraft();
+  if (draft) Object.assign(state, draft);
   let sharedLoaded = false;
   if (params.get('b')) { const sh = decodeBoard(params.get('b')); if (sh) { Object.assign(state, sh); sharedLoaded = true; } }
   const look = params.get('look'); if (look && THEMES.some((t) => t.id === look)) state.themeId = look;
   const pg = params.get('goals'); if (pg) { const cats = new Set(CATEGORIES.map((c) => c.id)); const g = pg.split(',').filter((x) => cats.has(x)).slice(0, 7); if (g.length) state.goals = g; }
-  $('#titleInput').value = state.title; markFont();
-  $('#wordInput').value = state.word;
-  applyI18n(); buildThemeGrid(); renderVibes();
+  buildMonthPills();
+  applyI18n(); buildThemeGrid(); renderVibes(); renderSavedBoards();
+  syncControlsFromState();
   const code = params.get('unlock');
+  let justUnlocked = false;
   if (code) {
-    await tryUnlock(code);
+    justUnlocked = await tryUnlock(code);
     params.delete('unlock'); history.replaceState(null, '', location.pathname + (params.toString() ? '?' + params : '') + location.hash);
   }
   await loadManifest(); await ensureFonts();
   await renderPreview(); renderHero(); renderThumbs();
-  if (sharedLoaded || look) { track(sharedLoaded ? 'template_open' : 'look_open', { theme: state.themeId }); if (sharedLoaded) showReveal(); }
+  if (justUnlocked) { $('#make').scrollIntoView({ behavior: 'smooth' }); }
+  else if (sharedLoaded || look) { track(sharedLoaded ? 'template_open' : 'look_open', { theme: state.themeId }); if (sharedLoaded) showReveal(); }
   let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { renderPreview(); renderHero(); }, 200); });
 })();

@@ -5,7 +5,8 @@ window.GLOWBOARD_CONFIG = {
   // 1) Paste your payment link (Gumroad / Lemon Squeezy / Stripe Payment Link / Ko-fi shop).
   //    Leave empty to show a "Join the Pro waitlist" email button instead.
   PRO_PAYMENT_URL: "https://qiny.gumroad.com/l/glowboard-pro",
-  PRO_PRICE_LABEL: "$4.99",
+  PRO_PRICE_LABEL: "$1.99",
+  PRO_COMPARE_PRICE: "$5.99",
 
   // 2) In your payment product settings, set the redirect / thank-you URL to:
   //       https://glowboard.quantworlds.com/?unlock=YOUR_SECRET_CODE

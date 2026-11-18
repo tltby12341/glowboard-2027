@@ -27,7 +27,7 @@
 <script src="config.js"></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
- {"@type":"WebApplication","name":"Glowboard","url":"https://glowboard.quantworlds.com/","applicationCategory":"DesignApplication","operatingSystem":"Any (web browser)","description":"Free 2027 vision board maker that creates lock screen wallpapers for iPhone and Android.","featureList":["18 vision board aesthetics","iPhone and Android lock screen sizes","Desktop 4K and printable A4","Printable 2027 goals checklist","Matching home screen wallpaper","Shareable board templates","Photos stay on your device"],"offers":[{"@type":"Offer","price":"0","priceCurrency":"USD","name":"Free"},{"@type":"Offer","price":"4.99","priceCurrency":"USD","name":"Pro (one-time)"}]},
+ {"@type":"WebApplication","name":"Glowboard","url":"https://glowboard.quantworlds.com/","applicationCategory":"DesignApplication","operatingSystem":"Any (web browser)","description":"Free 2027 vision board maker that creates lock screen wallpapers for iPhone and Android.","featureList":["18 vision board aesthetics","iPhone and Android lock screen sizes","Desktop 4K and printable A4","Printable 2027 goals checklist","Matching home screen wallpaper","Shareable board templates","Photos stay on your device"],"offers":[{"@type":"Offer","price":"0","priceCurrency":"USD","name":"Free"},{"@type":"Offer","price":"1.99","priceCurrency":"USD","name":"Pro (one-time)"}]},
  {"@type":"FAQPage","mainEntity":[
   {"@type":"Question","name":"Is Glowboard free?","acceptedAnswer":{"@type":"Answer","text":"Yes. Make and download iPhone or Android vision board wallpapers in three looks for free. Pro is a one-time unlock for every look, no watermark and bigger sizes."}},
   {"@type":"Question","name":"Do my photos get uploaded?","acceptedAnswer":{"@type":"Answer","text":"No. Everything runs in your browser and your photos never leave your device."}},
@@ -77,17 +77,26 @@
   <section class="maker" id="make">
     <div class="maker-preview">
       <div class="preview-sticky">
-        <p class="eyebrow" data-i18n="preview_label">Live preview</p>
+        <div class="preview-modes" id="previewModes" role="tablist" aria-label="Live preview mode">
+          <button type="button" role="tab" aria-selected="true" class="on" data-pmode="lock">Lock screen</button>
+          <button type="button" role="tab" aria-selected="false" data-pmode="home">Home <b class="mini-pro">PRO</b></button>
+          <button type="button" role="tab" aria-selected="false" data-pmode="checklist">Checklist <b class="mini-pro">PRO</b></button>
+        </div>
         <div class="device phone big" id="device">
           <canvas id="preview"></canvas>
           <div class="lock" id="lockOverlay"><div class="island"></div><div class="date"></div><div class="time">9:41</div></div>
+          <div class="home-mock" id="homeOverlay" aria-hidden="true">
+            <div class="hm-top"><div class="hm-widget"><span>2027</span><small>daily focus</small></div><div class="hm-apps"><i></i><i></i><i></i><i></i></div></div>
+            <div class="hm-row"><i></i><i></i><i></i><i></i></div>
+            <div class="hm-dock"><i></i><i></i><i></i><i></i></div>
+          </div>
           <div class="pro-ribbon" id="proRibbon">PRO</div>
         </div>
         <div class="preview-actions">
           <button class="btn btn-soft" id="shuffleBtn" type="button"><svg viewBox="0 0 24 24" width="16" height="16"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="shuffle">Shuffle layout</span></button>
           <button class="btn btn-primary" id="downloadBtn" type="button"><svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 3v12m0 0 5-5m-5 5-5-5M4 21h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="download">Download my wallpaper</span></button>
         </div>
-        <p class="swap-hint" id="swapHint">Tip: tap any photo in the preview to swap it</p>
+        <p class="swap-hint" id="swapHint">Tip: tap any photo or quote card in the preview to swap it</p>
         <button class="link-btn tpl-btn" id="tplBtn" type="button"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Send this board to a friend</button>
       </div>
     </div>
@@ -96,6 +105,13 @@
       <div class="vibes-wrap">
         <p class="vibes-title"><b>Quick start:</b> pick a vibe, tweak later</p>
         <div class="vibes" id="vibes"></div>
+      </div>
+      <div class="saved-bar" id="savedBar">
+        <div class="saved-head">
+          <span class="saved-label"><b>My boards</b> <small id="savedMeta">Auto-saved · 1 free slot</small></span>
+          <button type="button" class="pill save-board-btn" id="saveBoardBtn">+ Save variation</button>
+        </div>
+        <div class="saved-list" id="savedList" hidden></div>
       </div>
       <div class="step">
         <div class="step-head"><span class="num">1</span><h2 data-i18n="step1">Pick your goals</h2></div>
@@ -131,6 +147,24 @@
           <button type="button" data-font="bold" style="font-family:Syne,sans-serif;font-weight:800">Bold</button>
           <button type="button" data-font="hand" style="font-family:Caveat,cursive;font-size:19px">Handwritten</button>
         </div>
+        <p class="field-label">Board layout</p>
+        <div class="seg" id="layoutSeg" role="group" aria-label="Board layout">
+          <button type="button" data-layout="collage" class="on">Classic collage</button>
+          <button type="button" data-layout="editorial">Editorial cover <b class="mini-pro">PRO</b></button>
+          <button type="button" data-layout="calendar">2027 Calendar <b class="mini-pro">PRO</b></button>
+        </div>
+        <div class="cal-month-row" id="calMonthRow" hidden>
+          <span class="field-label inline">Month on lock screen</span>
+          <div class="month-pills" id="monthPills" role="group" aria-label="Calendar month"></div>
+        </div>
+        <p class="field-label">Signature accent</p>
+        <div class="seg" id="stampSeg" role="group" aria-label="Signature accent">
+          <button type="button" data-stamp="" class="on">Look default</button>
+          <button type="button" data-stamp="none">Minimal (clean)</button>
+          <button type="button" data-stamp="angel">11:11 Angel <b class="mini-pro">PRO</b></button>
+          <button type="button" data-stamp="seal">Gold wax seal <b class="mini-pro">PRO</b></button>
+          <button type="button" data-stamp="postmark">2027 Postmark <b class="mini-pro">PRO</b></button>
+        </div>
         <label class="switch"><input type="checkbox" id="clockToggle" checked><span class="slider"></span><span data-i18n="clock_label">Leave space for the clock</span></label>
         <div class="photos">
           <div><strong data-i18n="photos_label">Add your own photos</strong><p class="hint small" data-i18n="photos_hint">Stays on your device, never uploaded.</p></div>
@@ -144,9 +178,14 @@
           <button type="button" data-size="iphone" class="on" data-i18n="size_iphone">iPhone</button>
           <button type="button" data-size="android" data-i18n="size_android">Android</button>
           <button type="button" data-size="story">IG / TikTok story</button>
+          <button type="button" data-size="card">3:4 Social card</button>
           <button type="button" data-size="desktop"><span data-i18n="size_desktop">Desktop 4K</span> <b class="mini-pro">PRO</b></button>
           <button type="button" data-size="ipad">iPad <b class="mini-pro">PRO</b></button>
           <button type="button" data-size="print"><span data-i18n="size_print">Print A4</span> <b class="mini-pro">PRO</b></button>
+        </div>
+        <div class="aff-teaser">
+          <div><strong>12 monthly 2027 calendar lock screens <span class="free-try-pill">Jan free</span></strong><p class="hint small">Your goals, photos and a real 2027 calendar for every month of the year. Try January free.</p></div>
+          <button class="btn btn-soft" id="calPackBtn" type="button">Open 12-month pack</button>
         </div>
         <div class="aff-teaser">
           <div><strong data-i18n="aff_title">30 daily affirmation lock screens</strong><p class="hint small" data-i18n="aff_sub">A fresh lock screen for every day of the month, in your aesthetic.</p></div>
@@ -155,6 +194,10 @@
         <div class="aff-teaser">
           <div><strong>Printable 2027 goals checklist <b class="mini-pro">PRO</b></strong><p class="hint small">An A4 page made from your board: your photos, your goals with checkboxes, and a monthly check-in row.</p></div>
           <button class="btn btn-soft" id="checklistBtn" type="button">Get my checklist</button>
+        </div>
+        <div class="aff-teaser kit-teaser">
+          <div><strong>Complete 2027 bundle (.zip) <b class="mini-pro">PRO</b></strong><p class="hint small">Lock screen, matching home screen, iPad, 4K desktop, calendar, A4 checklist &amp; 5 widget tiles in one tap.</p></div>
+          <button class="btn btn-dark" id="makerSetBtn" type="button">Get full .zip kit</button>
         </div>
       </div>
     </div>
@@ -181,9 +224,9 @@
         <a class="btn btn-ghost wide" href="#make" data-i18n="nav_make">Make yours</a>
       </div>
       <div class="plan pro">
-        <div class="glow-badge">✦ Best value</div>
+        <div class="glow-badge">✦ Best value · 50+ files</div>
         <h3 data-i18n="pro_name">Pro</h3>
-        <p class="price"><span class="pro-price">$4.99</span> <small data-i18n="pro_once">one-time · yours forever</small></p>
+        <p class="price"><s class="cmp-price">$5.99</s> <span class="pro-price">$1.99</span> <small data-i18n="pro_once">one-time · yours forever</small></p>
         <ul><li data-i18n="pro_f1">All 18 aesthetics + new drops</li><li data-i18n="pro_f2">No watermark</li><li data-i18n="pro_f3">Desktop 4K, iPad, printable A4 &amp; widgets</li><li data-i18n="pro_f4">30 daily-affirmation lock screens</li><li data-i18n="pro_f5">Matching home screen + printable goals checklist</li><li data-i18n="pro_f6">Use your own photos in every look</li></ul>
         <div class="pro-peek" aria-hidden="true"><img src="assets/looks/mobwife-23.webp" alt="" loading="lazy" width="540" height="1170"><img src="assets/looks/darkluxe-11.webp" alt="" loading="lazy" width="540" height="1170"><img src="assets/looks/softglam-23.webp" alt="" loading="lazy" width="540" height="1170"><img src="assets/looks/cozywinter-37.webp" alt="" loading="lazy" width="540" height="1170"><img src="assets/looks/y2k-11.webp" alt="" loading="lazy" width="540" height="1170"></div>
         <button class="btn btn-primary wide unlock-btn" type="button" data-i18n="unlock">Unlock Pro</button>
@@ -206,7 +249,7 @@
       </article>
       <article class="gift-card pro">
         <span class="gift-ico">🎁</span>
-        <h3>Gift Glowboard Pro <span class="gift-tag gold"><span class="pro-price">$4.99</span></span></h3>
+        <h3>Gift Glowboard Pro <span class="gift-tag gold"><span class="pro-price">$1.99</span></span></h3>
         <p>At checkout, tick <b>“Give as a gift?”</b> and enter their email. Gumroad sends them the gift with their unlock, so they get all 18 looks with no watermark.</p>
         <button class="btn btn-primary gift-btn" type="button">Gift Pro →</button>
       </article>
@@ -248,7 +291,7 @@
     </div>
     <div class="upsell2" id="resultUpsell">
       <canvas id="upsellCv" aria-hidden="true"></canvas>
-      <div><strong>Love it? Make it clean.</strong><p>No watermark, the matching home screen, all 18 looks and the full 2027 set (iPad, 4K, widgets). <span class="pro-price">$4.99</span> once.</p><button class="btn btn-dark up-btn" type="button" id="upsellBtn">See Pro</button></div>
+      <div><strong>Love it? Make it clean.</strong><p>No watermark, the matching home screen, all 18 looks and the full 2027 set (iPad, 4K, widgets). <span class="pro-price">$1.99</span> once.</p><button class="btn btn-dark up-btn" type="button" id="upsellBtn">See Pro</button></div>
     </div>
     <div class="home-teaser" id="homeTeaser">
       <span>📱 Want the matching <b>home screen</b>?</span>
@@ -284,24 +327,27 @@
 <div class="modal" id="payModal" role="dialog" aria-modal="true" aria-labelledby="payTitle">
   <div class="sheet pay-sheet">
     <button class="close" type="button" data-close aria-label="Close">×</button>
-    <p class="eyebrow">Glowboard Pro</p>
+    <p class="eyebrow" id="payEyebrow">Glowboard Pro · Complete 2027 Kit</p>
     <h3 id="payTitle">Get this look, <em>watermark&#8209;free</em></h3>
-    <div class="compare">
-      <figure><div class="cmp-phone"><canvas id="cmpFree"></canvas></div><figcaption>Free</figcaption></figure>
+    <div class="compare" id="payCompare">
+      <figure><div class="cmp-phone" id="cmpFreeWrap"><canvas id="cmpFree"></canvas></div><figcaption id="cmpFreeCap">Free</figcaption></figure>
       <div class="cmp-arrow" aria-hidden="true">→</div>
-      <figure class="pro"><div class="cmp-phone"><canvas id="cmpPro"></canvas><span class="cmp-tag">PRO</span></div><figcaption>Pro</figcaption></figure>
+      <figure class="pro"><div class="cmp-phone" id="cmpProWrap"><canvas id="cmpPro"></canvas><span class="cmp-tag">PRO</span></div><figcaption id="cmpProCap">Pro</figcaption></figure>
+    </div>
+    <div class="bundle-pills" aria-label="Included in Pro">
+      <span>18 Looks</span><span>Lock + Home</span><span>12 Calendars</span><span>30 Affirmations</span><span>A4 Checklist</span><span>4K + Widgets .zip</span>
     </div>
     <ul class="pay-list">
-      <li><b>All 18 looks</b>, plus every new look we add</li>
-      <li><b>No watermark</b> on any download</li>
-      <li><b>4K desktop, iPad, printable A4, widget pack</b> + the full set as one .zip</li>
-      <li><b>30 daily affirmation</b> lock screens</li>
+      <li><b>All 18 looks + Pro layouts</b> (Editorial cover, 2027 Calendar &amp; Gold Wax Seal)</li>
+      <li><b>No watermark</b> on any lock screen, card or print</li>
+      <li><b>Matching home screen + printable A4 checklist</b> built from your board</li>
+      <li><b>12 monthly calendars + 30 daily affirmations</b> + full 2027 set as one .zip</li>
     </ul>
     <div class="pro-strip" id="proStrip" aria-hidden="true"></div>
-    <div class="pay-sticky"><button class="btn btn-primary wide unlock-btn pay-cta" type="button">Unlock Pro · <span class="pro-price">$4.99</span> one-time</button>
-    <p class="trust"><span>Secure checkout by Gumroad</span><span>Instant unlock</span><span>One-time, yours forever</span></p></div>
+    <div class="pay-sticky"><button class="btn btn-primary wide unlock-btn pay-cta" type="button">Unlock Pro · <s class="cmp-price">$5.99</s> <span class="pro-price">$1.99</span> one-time</button>
+    <p class="trust"><span>Secure checkout by Gumroad</span><span>Instant unlock</span><span>Less than $0.17/mo</span></p></div>
     <div class="pay-links">
-      <button class="link-btn" id="freeAlt" type="button">Use a free look instead</button>
+      <button class="link-btn" id="freeAlt" type="button">Use free options instead</button>
       <button class="link-btn code-btn" type="button">Already bought? Enter code</button>
     </div>
   </div>
@@ -316,12 +362,31 @@
   </div>
 </div>
 
-<div class="modal" id="affModal" role="dialog" aria-modal="true">
+<div class="modal" id="affModal" role="dialog" aria-modal="true" aria-labelledby="affModalTitle">
   <div class="sheet wide">
     <button class="close" type="button" data-close aria-label="Close">×</button>
-    <h3 data-i18n="aff_title">30 daily affirmation lock screens</h3>
-    <p class="hint" data-i18n="aff_sub">A fresh lock screen for every day of the month, in your aesthetic.</p>
+    <div class="pack-head">
+      <div>
+        <h3 id="affModalTitle" data-i18n="aff_title">30 daily affirmation lock screens</h3>
+        <p class="hint" data-i18n="aff_sub">A fresh lock screen for every day of the month, in your aesthetic. Days 1–3 are free to try.</p>
+      </div>
+      <button class="btn btn-dark" id="affZipBtn" type="button">Download all 30 (.zip) <b class="mini-pro">PRO</b></button>
+    </div>
     <div class="aff-grid" id="affGrid"></div>
+  </div>
+</div>
+
+<div class="modal" id="calModal" role="dialog" aria-modal="true" aria-labelledby="calModalTitle">
+  <div class="sheet wide">
+    <button class="close" type="button" data-close aria-label="Close">×</button>
+    <div class="pack-head">
+      <div>
+        <h3 id="calModalTitle">12 monthly 2027 calendar lock screens</h3>
+        <p class="hint">Your goals, photos and a real 2027 calendar for every month of the year. Tap January to save free, or unlock all 12.</p>
+      </div>
+      <button class="btn btn-dark" id="calZipBtn" type="button">Download all 12 (.zip) <b class="mini-pro">PRO</b></button>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
   </div>
 </div>
 
@@ -329,7 +394,7 @@
   <canvas id="nudgeCv" aria-hidden="true"></canvas>
   <div class="nudge-body">
     <strong id="nudgeTitle">Saved ✓ Want it without the watermark?</strong>
-    <p id="nudgeText">Pro removes it and unlocks all 18 looks, a matching home screen and iPad &amp; 4K sizes. <span class="pro-price">$4.99</span> once.</p>
+    <p id="nudgeText">Pro removes it and unlocks all 18 looks, a matching home screen and iPad &amp; 4K sizes. <span class="pro-price">$1.99</span> once.</p>
     <div class="nudge-actions"><button class="btn btn-dark" type="button" id="nudgeGo">See Pro</button><button class="link-btn" type="button" id="nudgeNo">No thanks</button></div>
   </div>
   <button class="nudge-x" type="button" id="nudgeX" aria-label="Dismiss">×</button>
