@@ -223,7 +223,7 @@ $('#vibes').addEventListener('click', (e) => {
   renderChips(); markTheme(); schedule(true); track('vibe', { vibe: v.id });
   gcEvent('look-' + v.theme, v.name);
   if (!isPro && themeById(v.theme).pro) gcEvent('pro-locked-look', v.name);
-  if (matchMedia('(max-width: 900px)').matches) $('#device').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  if (matchMedia('(max-width: 760px)').matches) $('#device').scrollIntoView({ behavior: 'smooth', block: 'center' });
 });
 
 // ---------- themes ----------
@@ -242,7 +242,7 @@ $('#themeGrid').addEventListener('click', (e) => {
   const picked = themeById(state.themeId);
   gcEvent('look-' + state.themeId, picked && picked.name);
   if (!isPro && picked && picked.pro) gcEvent('pro-locked-look', picked.name);
-  if (matchMedia('(max-width:900px)').matches) $('#device').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  if (matchMedia('(max-width:760px)').matches) $('#device').scrollIntoView({ behavior: 'smooth', block: 'center' });
 });
 let thumbTimer;
 let thumbsVisible = false, thumbsDirty = false, thumbGen = 0;
