@@ -1,0 +1,48 @@
+# Glowboard
+
+> Glowboard (https://glowboard.quantworlds.com) is a free, browser-based 2027 vision board wallpaper maker for iPhone and Android lock screens. Users pick 4–7 life goals, a word of the year, and an aesthetic look, optionally add their own photos (which stay on their device), and download a clock-safe lock screen collage in about 60 seconds with no sign-up.
+
+- Free tier: 3 aesthetics (Clean Girl, Coquette, Old Money), iPhone (1179 × 2556 px), Android (1080 × 2400 px), Story (1080 × 1920 px), and 3:4 card PNG exports with a subtle watermark, January 2027 calendar lock screen, days 1–3 affirmation lock screens, 1 saved board slot, and free shareable friend board links.
+- Pro tier (US$1.99 one-time payment via Gumroad, no subscription): all 18 aesthetics, Editorial Cover and 2027 Calendar layouts, signature stamps (11:11 Angel, Gold Wax Seal, 2027 Postmark), watermark-free exports, iPad, Desktop 4K, and printable A4 sizes, all 12 monthly 2027 calendar lock screens (.zip), 30 daily affirmation lock screens (.zip), matching blurred home screen wallpaper, printable A4 2027 goals checklist, unlimited saved boards, and a one-tap 2027 widget/wallpaper set (.zip).
+- Privacy: static client-side web app with no accounts, no photo uploads, and cookieless GoatCounter analytics.
+- Contact: qiny0015@gmail.com
+
+Last updated: 2026-11-18
+
+## Maker & Hubs
+
+- [Glowboard 2027 Vision Board Maker](https://glowboard.quantworlds.com/): Interactive lock screen maker, pricing, and FAQ
+- [2027 Vision Board Ideas & 18 Aesthetics](https://glowboard.quantworlds.com/ideas/): Visual directory of all 18 looks and guides
+
+## Guides & Topic Resources
+
+- [How to Make a Vision Board for 2027](https://glowboard.quantworlds.com/guide/how-to-make-a-vision-board): 9-step practical method from choosing goals to setting your wallpaper
+- [How to Make a Vision Board Lock Screen](https://glowboard.quantworlds.com/guide/vision-board-lock-screen): Exact iPhone and Android sizes, clock-safe spacing, and setup steps
+- [2027 Calendar Wallpaper for Lock Screen](https://glowboard.quantworlds.com/ideas/2027-calendar-wallpaper): Monthly 2027 calendar lock screens (January free, 12-month pack in Pro)
+- [120 Goal Ideas for 2027 by Category](https://glowboard.quantworlds.com/ideas/2027-goals-list): Specific goal ideas across 12 life areas
+- [152 Vision Board Affirmations for 2027](https://glowboard.quantworlds.com/ideas/2027-affirmations-wallpaper): Short present-tense affirmations grouped by goal
+- [30 Vision Board Ideas for Women (2027)](https://glowboard.quantworlds.com/ideas/vision-board-ideas-for-women): Ideas across career, money, health, love, home, and travel
+- [Manifestation Lock Screen Wallpaper](https://glowboard.quantworlds.com/ideas/manifestation-lock-screen): How to combine present-tense affirmations with outcome photos
+- [Free Vision Board Templates 2027](https://glowboard.quantworlds.com/ideas/free-vision-board-template): Ready-made phone, desktop, and printable templates
+- [Vision Board Gift Idea for 2027](https://glowboard.quantworlds.com/ideas/vision-board-gift): Design a personal lock screen board for a friend or gift Pro
+
+## 18 Vision Board Aesthetics
+
+- [Coquette Vision Board Wallpaper](https://glowboard.quantworlds.com/ideas/coquette-vision-board-wallpaper): Blush pink, ribbon bows, and romantic script (Free)
+- [Old Money Vision Board](https://glowboard.quantworlds.com/ideas/old-money-vision-board): Quiet luxury in deep green, cream, and gold (Free)
+- [Clean Girl Vision Board](https://glowboard.quantworlds.com/ideas/clean-girl-vision-board): Neutral linen, matcha, pilates, and calm routines (Free)
+- [Mob Wife Aesthetic Wallpaper](https://glowboard.quantworlds.com/ideas/mob-wife-aesthetic-wallpaper): Leopard print, espresso martinis, and bold gold
+- [Dark Luxury Vision Board](https://glowboard.quantworlds.com/ideas/dark-luxury-vision-board): Black and champagne gold for career and wealth goals
+- [Y2K Chrome Vision Board](https://glowboard.quantworlds.com/ideas/y2k-vision-board-wallpaper): Iridescent gradients, chrome stars, and bold type
+- [Cozy Winter Wallpaper](https://glowboard.quantworlds.com/ideas/cozy-winter-wallpaper-iphone): Cabin snow, candles, cocoa, and slow winter months
+- [Coastal Summer Vision Board](https://glowboard.quantworlds.com/ideas/coastal-summer-vision-board): Blue stripes, linen, and Mediterranean travel
+- [Soft Glam Vision Board](https://glowboard.quantworlds.com/ideas/soft-glam-wallpaper): Pearls, peonies, and rosy vanity aesthetics
+- [Cottagecore Vision Board](https://glowboard.quantworlds.com/ideas/cottagecore-vision-board): Sage green, gardens, and handwritten notes
+- [Polaroid Scrapbook Vision Board](https://glowboard.quantworlds.com/ideas/scrapbook-vision-board): Corkboard, taped polaroids, and captions
+- [Minimalist Vision Board](https://glowboard.quantworlds.com/ideas/minimalist-vision-board): Focused black-and-white monochrome layout
+- [Dark Academia Vision Board](https://glowboard.quantworlds.com/ideas/dark-academia-vision-board): Candle-lit libraries, leather books, and study goals
+- [Pink Y2K Vision Board](https://glowboard.quantworlds.com/ideas/pink-y2k-wallpaper): Hot pink, glitter, and butterfly accents
+- [Old Money Winter Wallpaper](https://glowboard.quantworlds.com/ideas/old-money-winter-wallpaper): Alpine ski chalets, cream knits, and navy
+- [Pinterest Mood Collage Vision Board](https://glowboard.quantworlds.com/ideas/pinterest-collage-vision-board): Taped photos, sticky notes, and graph paper
+- [35mm Film Vision Board](https://glowboard.quantworlds.com/ideas/35mm-film-vision-board): Analog film strips and warm grain
+- [Celestial Vision Board](https://glowboard.quantworlds.com/ideas/celestial-vision-board): Midnight sky, gold stars, and celestial arches

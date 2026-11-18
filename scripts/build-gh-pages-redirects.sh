@@ -32,12 +32,14 @@ redirect_html() {
 <meta name="robots" content="noindex">
 <script>
 (function () {
-  var prefix = ${PREFIX@Q};
+  var prefix = "${PREFIX}";
   var path = location.pathname || "/";
   if (path === prefix || path === prefix + "/") path = "/";
   else if (path.indexOf(prefix + "/") === 0) path = path.slice(prefix.length);
+  if (path.slice(-11) === "/index.html") path = path.slice(0, -10);
+  else if (path.slice(-5) === ".html") path = path.slice(0, -5);
   if (!path) path = "/";
-  location.replace(${NEW_ORIGIN@Q} + path + location.search + location.hash);
+  location.replace("${NEW_ORIGIN}" + path + location.search + location.hash);
 })();
 </script>
 </head>
@@ -65,7 +67,7 @@ while IFS= read -r -d '' rel; do
   if [[ "$rel" == */index.html ]]; then
     dest="${NEW_ORIGIN}/${rel%index.html}"
   elif [[ "$rel" == *.html ]]; then
-    dest="${NEW_ORIGIN}/${rel}"
+    dest="${NEW_ORIGIN}/${rel%.html}"
   fi
   mkdir -p "$OUT/$(dirname "$rel")"
   redirect_html "$dest" > "$OUT/$rel"

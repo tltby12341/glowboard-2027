@@ -1,4 +1,65 @@
+# Glowboard — https://glowboard.quantworlds.com
+# Search engines and AI assistants are welcome to crawl and cite the public pages.
+# Plain-text summary for language models: https://glowboard.quantworlds.com/llms.txt
+
+User-agent: GPTBot
+Allow: /
+Disallow: /unlock-helper
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /unlock-helper
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /unlock-helper
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /unlock-helper
+
+User-agent: Perplexity-User
+Allow: /
+Disallow: /unlock-helper
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /unlock-helper
+
+User-agent: Claude-SearchBot
+Allow: /
+Disallow: /unlock-helper
+
+User-agent: Claude-User
+Allow: /
+Disallow: /unlock-helper
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /unlock-helper
+
+User-agent: Googlebot
+Allow: /
+Disallow: /unlock-helper
+
+User-agent: Bingbot
+Allow: /
+Disallow: /unlock-helper
+
+User-agent: Applebot
+Allow: /
+Disallow: /unlock-helper
+
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /unlock-helper
+
+User-agent: DuckDuckBot
+Allow: /
+Disallow: /unlock-helper
+
 User-agent: *
 Allow: /
-Disallow: /unlock-helper.html
+Disallow: /unlock-helper
+
 Sitemap: https://glowboard.quantworlds.com/sitemap.xml

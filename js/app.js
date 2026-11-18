@@ -1002,6 +1002,8 @@ $('#revealEdit').addEventListener('click', () => { closeModals(); track('reveal_
   if (params.get('b')) { const sh = decodeBoard(params.get('b')); if (sh) { Object.assign(state, sh); sharedLoaded = true; } }
   const look = params.get('look'); if (look && THEMES.some((t) => t.id === look)) state.themeId = look;
   const pg = params.get('goals'); if (pg) { const cats = new Set(CATEGORIES.map((c) => c.id)); const g = pg.split(',').filter((x) => cats.has(x)).slice(0, 7); if (g.length) state.goals = g; }
+  const pl = params.get('layout'); if (pl && ['collage', 'editorial', 'calendar'].includes(pl)) state.layout = pl;
+  const pm = params.get('month'); if (pm && /^\d+$/.test(pm)) state.calMonth = Math.max(0, Math.min(11, parseInt(pm, 10) - 1));
   buildMonthPills();
   applyI18n(); buildThemeGrid(); renderVibes(); renderSavedBoards();
   syncControlsFromState();
@@ -1014,6 +1016,6 @@ $('#revealEdit').addEventListener('click', () => { closeModals(); track('reveal_
   await loadManifest(); await ensureFonts();
   await renderPreview(); renderHero(); renderThumbs();
   if (justUnlocked) { $('#make').scrollIntoView({ behavior: 'smooth' }); }
-  else if (sharedLoaded || look) { track(sharedLoaded ? 'template_open' : 'look_open', { theme: state.themeId }); if (sharedLoaded) showReveal(); }
+  else if (sharedLoaded || look || pl) { track(sharedLoaded ? 'template_open' : 'look_open', { theme: state.themeId, layout: state.layout }); if (sharedLoaded) showReveal(); }
   let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { renderPreview(); renderHero(); }, 200); });
 })();
